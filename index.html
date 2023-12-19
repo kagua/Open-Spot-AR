@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ハチ公銅像までの距離</title>
+  <style>
+    body {
+      background-color: yellow; /* 背景色を黄色に設定 */
+      margin: 0; /* 余白をなくす */
+    }
+    .container {
+      display: flex;
+      flex-direction: column; /* 縦方向の並び */
+      justify-content: center; /* 水平方向の中央揃え */
+      align-items: center; /* 垂直方向の中央揃え */
+      height: 80vh; /* コンテナの高さをビューポートの高さに設定 */
+    }
+    #check {
+      font-size: 18pt;
+      background-color: purple; /* ボタンの背景色を紫に設定 */
+      color: white; /* ボタンのテキスト色を白に設定 */
+      border: none; /* 枠線を削除 */
+      padding: 10px 20px; /* パディングを設定 */
+      border-radius: 5px; /* ボタンの角を丸くする */
+    }
+    #check:hover {
+      background-color: #7d00ff; /* ホバー時のボタンの背景色を変更 */
+    }
+    .text {
+      font-size: 24pt;
+      color: black; /* テキストの色を黒に設定 */
+      margin-bottom: 18pt; /* ボタンとの間のマージン */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="text">ハチ公銅像までの<br/>距離を測るよ<br/>（10m以内でビンゴ）</div>
+    <button id="check">場所をチェックする</button>
+    <div class="text"></div>
+    <div class="text"><img src="landmark_hachikou.png" width="200"/></div>
+  </div>
+
+<script type="text/javascript">
+
+// ハチ公銅像の緯度経度を取得する
+const latitude1 = 35.65906317377941
+const longitude1 = 139.700618390672;
+
+// ボタンの要素を取得する
+const button = document.getElementById("check");
+
+// ボタンのクリックイベントを処理する
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // 地球の半径、メートル単位
+    const a1 = lat1 * Math.PI / 180; // a1、b1 は緯度経度のラジアン値
+    const a2 = lat2 * Math.PI / 180;
+    const b1 = (lat2 - lat1) * Math.PI / 180;
+    const b2 = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(b1 / 2) * Math.sin(b1 / 2) +
+              Math.cos(a1) * Math.cos(a2) *
+              Math.sin(b2 / 2) * Math.sin(b2 / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c; // メートル単位の距離
+    return distance;
+}
+
+button.addEventListener("click", () => {
+  // 位置情報を取得する
+  navigator.geolocation.getCurrentPosition((position) => {
+    // 緯度を取得する
+    const latitude2 = position.coords.latitude;
+
+    // 経度を取得する
+    const longitude2 = position.coords.longitude;
+
+    // 距離を計算する
+    const distance = calculateDistance(latitude1, longitude1, latitude2, longitude2);
+
+    // 距離が10m以内かどうかを判定する
+    const isInRange = distance < 20;
+
+    // 結果を表示する
+    var gosa = (Math.round(distance * 10)/10);
+    var aaa = "誤差："+gosa+"m";
+    if (isInRange) {
+      alert("ビーーンゴ！ "+aaa);
+    } else {
+      alert("もっと近づいて！"+aaa);
+    }
+  });
+});
+
+</script>
+
+</body>
+</html>
