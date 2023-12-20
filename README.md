@@ -1,5 +1,5 @@
 # Open-Spot-AR
- JavaScriptだけで動作するシンプルな地点ARです。
+ JavaScriptだけで動作するシンプルな地点ARです。HTMLとJavaScriptのみで実装していますので、イベントやスポットごとに改修が簡単です。
 
 ![Screenshot_20231218-220830](https://github.com/kagua/Simple-Spot-AR/assets/631291/cb8728d9-87fc-44d1-9b30-7c4b5ced09bd)
 
@@ -26,5 +26,16 @@ https://www.kagua.biz/panpan/
 - JavaScriptで緯度経度を取得
 - 指定の緯度経度との距離を算出
 - 差が20メートル以内なら、サンプルMP3を自動再生
+
+## ロードマップ
+
+- 複数地点登録
+- スポット侵入でBGM自動再生&ループ
+- スポット侵入で再生ボタン表示
+- 再生ボタン全ロック解除で終了メッセージ
+- スポット離脱でBGM自動終了
+- ロゴ作成
+- サンプルボイス一般募集
+- キャラクター作成
 
 2023年12月19日
