@@ -21,5 +21,12 @@ https://www.kagua.biz/tool/javascript-tool/20231219a1.html
 
 https://www.kagua.biz/panpan/
 
+## 仕組み
+
+JavaScriptで緯度経度を取得
+
+指定の緯度経度との距離を算出
+
+差が20メートル以内なら、サンプルMP3を自動再生
 
 2023年12月19日
