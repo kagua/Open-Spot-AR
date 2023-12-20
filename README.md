@@ -1,9 +1,9 @@
-# Simple-Spot-AR
+# Open-Spot-AR
  JavaScriptだけで動作するシンプルな地点ARです。
 
 ![Screenshot_20231218-220830](https://github.com/kagua/Simple-Spot-AR/assets/631291/cb8728d9-87fc-44d1-9b30-7c4b5ced09bd)
 
-## オープン音声AR「シンプルスポットAR」
+## オープン音声AR「オープンスポットAR」
 
 とにかくシンプルに実装できる地点ARを作りました。サーバーにHTMLファイルと、その地点で動作させたい画像や音声や動画を連動させるだけで、とりあえずスポットガイド的には使えると思います。GPS精度はブラウザ由来なのであまり期待しないでください。
 
