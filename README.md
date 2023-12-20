@@ -1,7 +1,7 @@
 # Simple-Spot-AR
  JavaScriptだけで動作するシンプルな地点ARです。
 
-![Screenshot_20231218-220830](https://github.com/kagua/Simple-Spot-AR/assets/631291/c26d8229-f3f3-42d6-b430-685bf92145bc)
+![Screenshot_20231218-220830](https://github.com/kagua/Simple-Spot-AR/assets/631291/cb8728d9-87fc-44d1-9b30-7c4b5ced09bd)
 
 ## オープン音声AR「シンプルスポットAR」
 
