@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ハチ公銅像までの距離</title>
@@ -45,7 +52,7 @@
 
 <!-- オーディオ要素の定義。ここでMP3ファイルを指定します -->
 <audio id="myAudio" preload="auto">
-  <source src="sample-voice1.mp3" type="audio/mpeg">
+  <source src="sample-voice.mp3" type="audio/mpeg">
   お使いのブラウザはaudio要素をサポートしていません。
 </audio>
 
@@ -62,13 +69,8 @@
 <script type="text/javascript">
 
 // ハチ公銅像の緯度経度を取得する
-const latitude1 = 35.65906317377941;
-const longitude1 = 139.700618390672;
-
-
-// 教材ドットコム
-//const latitude1 = 35.838747890196544;
-//const longitude1 = 139.5860335786778;
+//const latitude1 = 35.65906317377941;
+//const longitude1 = 139.700618390672;
 
 // ボタンの要素を取得する
 const button = document.getElementById("check");
@@ -92,11 +94,11 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 button.addEventListener("click", () => {
+
   // 位置情報を取得する
   navigator.geolocation.getCurrentPosition((position) => {
     // 緯度を取得する
     const latitude2 = position.coords.latitude;
-
     // 経度を取得する
     const longitude2 = position.coords.longitude;
 
@@ -104,21 +106,33 @@ button.addEventListener("click", () => {
     const distance = calculateDistance(latitude1, longitude1, latitude2, longitude2);
 
     // 距離が10m以内かどうかを判定する
-    const isInRange = distance < 20;
+    const isInRange = distance < 10;
 
     // 結果を表示する
     var gosa = (Math.round(distance * 10)/10);
     var aaa = "誤差："+gosa+"m";
     if (isInRange) {
-      audioplay();alert("ビーーンゴ！ "+aaa);
+      audioplay();alert("ビーーンゴ！ "+aaa+"\n"+latitude2+":"+longitude2);
     } else {
-      alert("もっと近づいて！"+aaa);
+      alert("もっと近づいて！"+aaa+"\n"+latitude2+":"+longitude2);
     }
+
+  },
+  (error) => {
+    // エラー処理
+    console.error("Error: " + error.message);
+  },
+  {
+    enableHighAccuracy: true, // 高精度な位置情報を要求
+    timeout: 10000, // タイムアウトまでの時間 (ミリ秒)
+    maximumAge: 0 // キャッシュされた位置情報の最大年齢 (ミリ秒)
+
   });
 });
 
 </script>
 
-
 </body>
 </html>
+
+
