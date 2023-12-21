@@ -44,7 +44,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <body>
   <div class="container">
-    <div class="text">ハチ公像までの<br/>距離を測るよ<br/>（10m以内でOK）</div>
+    <div class="text">ハチ公銅像までの<br/>距離を測るよ<br/>（10m以内でビンゴ）</div>
     <button id="check">場所をチェックする</button>
     <div class="text"></div>
     <div class="text"><img src="landmark_hachikou.png" width="200"/></div>
@@ -95,51 +95,39 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 button.addEventListener("click", () => {
 
-let positions = [];
-let watchID;
-let count = 0;
+  // 位置情報を取得する
+  navigator.geolocation.getCurrentPosition((position) => {
+    // 緯度を取得する
+    const latitude2 = position.coords.latitude;
+    // 経度を取得する
+    const longitude2 = position.coords.longitude;
 
-const options = {
-    enableHighAccuracy: true, // 高精度位置情報オプションを有効化
-    timeout: 5000, // タイムアウトの設定（オプション）
-    maximumAge: 0 // キャッシュされた位置情報の使用を防ぐ（オプション）
-};
-
-watchID = navigator.geolocation.watchPosition(position => {
-    positions.push(position);
-    count++;
-
-    if (count === 3) {
-        navigator.geolocation.clearWatch(watchID);
-        const avgLat = positions.reduce((sum, p) => sum + p.coords.latitude, 0) / positions.length;
-        const avgLon = positions.reduce((sum, p) => sum + p.coords.longitude, 0) / positions.length;
-
-            // 距離を計算する
+    // 距離を計算する
     const distance = calculateDistance(latitude1, longitude1, latitude2, longitude2);
 
-// 距離が10m以内かどうかを判定する
-const isInRange = distance < 10;
+    // 距離が10m以内かどうかを判定する
+    const isInRange = distance < 10;
 
-// 結果を表示する
-var gosa = (Math.round(distance * 10)/10);
-var aaa = "誤差："+gosa+"m";
-if (isInRange) {
-  audioplay();alert("ビーーンゴ！ "+aaa+"\n"+latitude2+":"+longitude2);
-} else {
-  alert("もっと近づいて！"+aaa+"\n"+latitude2+":"+longitude2);
-}
-
+    // 結果を表示する
+    var gosa = (Math.round(distance * 10)/10);
+    var aaa = "誤差："+gosa+"m";
+    if (isInRange) {
+      audioplay();alert("ビーーンゴ！ "+aaa+"\n"+latitude2+":"+longitude2);
+    } else {
+      alert("もっと近づいて！"+aaa+"\n"+latitude2+":"+longitude2);
     }
-}, error => {
-    console.error(error);
-    navigator.geolocation.clearWatch(watchID);
-}, options);
 
-// 1秒後に監視を停止するためのタイマー設定
-setTimeout(() => {
-    navigator.geolocation.clearWatch(watchID);
-}, 3000); // 3回取得するため、約3秒後に停止
-  
+  },
+  (error) => {
+    // エラー処理
+    console.error("Error: " + error.message);
+  },
+  {
+    enableHighAccuracy: true, // 高精度な位置情報を要求
+    timeout: 10000, // タイムアウトまでの時間 (ミリ秒)
+    maximumAge: 0 // キャッシュされた位置情報の最大年齢 (ミリ秒)
+
+  });
 });
 
 </script>
