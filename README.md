@@ -1,3 +1,5 @@
+![オープンスポット](https://github.com/kagua/Open-Spot-AR/assets/631291/76f41f7a-1d38-4574-b645-4ca07737bda3)
+
 # Open-Spot-AR
  JavaScriptだけで動作するシンプルな地点ARです。HTMLとJavaScriptのみで実装していますので、イベントやスポットごとに改修が簡単です。
 
