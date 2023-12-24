@@ -47,12 +47,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
 <body>
   <div class="container">
-    <div class="text">この場所の緯度経度を<br/>記録します</div>
+    <input type="text" style="font-size:18pt;" id="textInput" maxlength="20" placeholder="テキストを入力">
+    <div class="text">緯度経度を記録します</div>
     <button id="measureButton" style="font-size:24pt;">計測する</button>
     <div class="text" id="idokeido" style="font-size:100%;"></div>
     <div class="text"><a rel="nofollow" href="index.html"><strong> ホームに戻る</strong></a></div>
-  </div>
+    <div class="text" style="font-size:100%;"><strong><a target="_blank" rel="nofollow" href="https://what3words.com/">what3wordsで変換する</a></strong></div>
+    <div class="text" style="font-size:100%;"><strong><a target="_blank" rel="nofollow" href="https://www.google.com/maps/">GoogleマップでPLUSコード変換する</a></strong></div>
 
+
+  </div>
 
 
 <script type="text/javascript">
@@ -84,8 +88,9 @@ document.getElementById('measureButton').addEventListener('click', function() {
             const medianLatitude = calculateMedian(latitudes);
             const medianLongitude = calculateMedian(longitudes);
 
-            idokeidoDiv.innerHTML += `中央値: 緯度 = ${medianLatitude.toFixed(6)}, 経度 = ${medianLongitude.toFixed(6)}<br>`;
-            idokeidoDiv.innerHTML += '計測終了！スクショして保存してね';
+            idokeidoDiv.innerHTML += `<b>中央値: 緯度 = ${medianLatitude.toFixed(6)}, 経度 = ${medianLongitude.toFixed(6)}</b><br>`;
+            copyToClipboard(`${medianLatitude.toFixed(6)},${medianLongitude.toFixed(6)}`);
+            idokeidoDiv.innerHTML += '計測終了！緯度経度をクリップボードに入れた。<br>フォームに場所を書いてスクショ保存してね';
             measureButton.textContent = '計測する';
         }
     }, error => {
@@ -103,6 +108,15 @@ function calculateMedian(values) {
         return (values[half - 1] + values[half]) / 2.0;
     }
 }
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        console.log('緯度経度をクリップボードにコピーしました');
+    }, function(err) {
+        console.error('クリップボードへのコピーに失敗:', err);
+    });
+}
+
 
 </script>
 
