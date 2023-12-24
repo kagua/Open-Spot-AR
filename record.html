@@ -41,15 +41,71 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       margin-bottom: 18pt; /* ボタンとの間のマージン */
     }
   </style>
+
+
 </head>
 
 <body>
   <div class="container">
-    <div class="text">ハチ公までの<br/>距離を測る<br/>（10m以内でOK）</div>
-    <button id="check">緯度経度を記録する！</button>
-    <div class="text"></div>
-    <div class="text"><a rel="nofollow" target="_blank" href="index.html"><strong>🏚ホームに戻る</strong></a></div>
+    <div class="text">この場所の緯度経度を<br/>記録します</div>
+    <button id="measureButton" style="font-size:24pt;">計測する</button>
+    <div class="text" id="idokeido" style="font-size:100%;"></div>
+    <div class="text"><a rel="nofollow" href="index.html"><strong> ホームに戻る</strong></a></div>
   </div>
+
+
+
+<script type="text/javascript">
+
+document.getElementById('measureButton').addEventListener('click', function() {
+    let count = 0;
+    let latitudes = [];
+    let longitudes = [];
+    const maxMeasurements = 10;
+    const options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+    };
+
+    const measureButton = document.getElementById('measureButton');
+    const idokeidoDiv = document.getElementById('idokeido');
+    measureButton.textContent = '計測中...';
+
+    let watchId = navigator.geolocation.watchPosition(position => {
+        const { latitude, longitude } = position.coords;
+        latitudes.push(latitude);
+        longitudes.push(longitude);
+        idokeidoDiv.innerHTML += `計測${count + 1}: 緯度 = ${latitude}, 経度 = ${longitude}<br>`;
+        count++;
+
+        if (count >= maxMeasurements) {
+            navigator.geolocation.clearWatch(watchId);
+            const medianLatitude = calculateMedian(latitudes);
+            const medianLongitude = calculateMedian(longitudes);
+
+            idokeidoDiv.innerHTML += `中央値: 緯度 = ${medianLatitude.toFixed(6)}, 経度 = ${medianLongitude.toFixed(6)}<br>`;
+            idokeidoDiv.innerHTML += '計測終了！スクショして保存してね';
+            measureButton.textContent = '計測する';
+        }
+    }, error => {
+        console.error('Geolocation error:', error);
+        measureButton.textContent = '計測する';
+    }, options);
+});
+
+function calculateMedian(values) {
+    values.sort((a, b) => a - b);
+    const half = Math.floor(values.length / 2);
+    if (values.length % 2) {
+        return values[half];
+    } else {
+        return (values[half - 1] + values[half]) / 2.0;
+    }
+}
+
+</script>
+
 
 <!-- オーディオ要素の定義。ここでMP3ファイルを指定します -->
 <audio id="myAudio" preload="auto">
