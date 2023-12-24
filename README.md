@@ -3,7 +3,7 @@
 
 # Open-Spot-AR
 
-This program is free of charge. It is an open source project. It is a wonderful project that allows Japanese people to create an audio guide for your country while you are in Japan. You can link location information with audio, images, video, and other content. You can have native speakers of your country's language from all over the world produce a tour guide for you without ever leaving your location. This is a wonderful thing. Please use it to contribute to your local community and provide attractive content. Since it is open source, it opens up endless ideas.
+This program is free of charge. It is an open source project. It is a wonderful project that allows Japanese people to create an audio guide for your country while you are in Japan. You can link location information with audio, images, video, and other content. You can have native speakers of your country's language from all over the world produce a tour guide for you without ever leaving your location. This is a wonderful thing. Please use it to contribute to your local community and provide attractive content. Since this project is **MIT licensed**, it is very free to use and expand unlimited ideas.
 
  JavaScriptだけで動作するシンプルな地点ARです。HTMLとJavaScriptのみで実装していますので、イベントやスポットごとに改修が簡単です。
 
