@@ -1,5 +1,4 @@
-
-![オープンスポット](https://github.com/kagua/Open-Spot-AR/assets/631291/a01cbc39-4a0a-43d7-953a-377b112c7660)
+![オープンスポット](https://github.com/kagua/Open-Spot-AR/assets/631291/e8771184-adc2-4959-95ce-16c971e4c20d)
 
 # Open-Spot-AR
 
