@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>宝物を探せ！</title>
+    <style>
+        body,button {
+            font-size: 120%;
+            text-align: center;
+            margin-top: 50px;
+        }
+    body {
+      background-color: yellow; /* 背景色を黄色に設定 */
+      margin: 10px; /* 余白をなくす */
+    }
+
+        #status {
+            font-weight: bold;
+        }
+
+        #coordinates {
+            margin-top: 20px;
+        }
+	h1{
+	    text-align:center;
+	    margin:0;padding:0;
+	}
+    </style>
+</head>
+<body>
+<h1>宝物をさがせ！</h1>
+
+<button id="startTour" onclick="startTour()">ツアーを開始する</button>
+<button id="stopTour" onclick="stopTour()" style="display:none;">ツアーを終了</button>
+<p id="status"></p>
+<p id="coordinates">緯度: 経度: 差分: <br/> 目標緯度: 目標経度: 目標との差分: </p>
+
+<script>
+let watchId;
+let alerted = false;
+
+const targetSpots = [
+    { latitude: 35.8387419, longitude: 139.5860916 },
+    { latitude: 35.8386737, longitude: 139.5858670 }
+];
+
+let currentSpotIndex = 0;
+
+const targetRadius = 5;
+
+function startTour() {
+    const startButton = document.getElementById('startTour');
+    const stopButton = document.getElementById('stopTour');
+    const statusText = document.getElementById('status');
+    const coordinatesText = document.getElementById('coordinates');
+
+    alert('歩きスマホはしないで下さい');
+
+    startButton.style.display = 'none';
+    stopButton.style.display = 'inline';
+    statusText.innerText = '計測中・・・';
+
+    watchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const currentSpot = targetSpots[currentSpotIndex];
+            const distance = calculateDistance(latitude, longitude, currentSpot.latitude, currentSpot.longitude);
+
+            const targetCoordinates = `目標緯度: ${currentSpot.latitude.toFixed(6)},\n 目標経度: ${currentSpot.longitude.toFixed(6)}\n`;
+            const currentCoordinates = `緯度: ${latitude.toFixed(6)},\n 経度: ${longitude.toFixed(6)},\n 差分: ${distance.toFixed(2)} メートル\n\n, 目標との差分: ${targetRadius.toFixed(2)} メートル\n`;
+
+            coordinatesText.innerText = `${currentCoordinates}\n${targetCoordinates}`;
+
+            if (distance <= targetRadius && !alerted) {
+                if (currentSpotIndex === 0) {
+                    alert('最初のスポットに入りました！');
+                } else if (currentSpotIndex === targetSpots.length - 1) {
+                    alert('次のスポットに入りました！\nこれで終了です');
+                } else {
+                    alert(`指定スポット${currentSpotIndex + 1}に入りました！`);
+                }
+                alerted = true;
+
+                // 次の目標の緯度経度を表示
+                const nextSpot = targetSpots[currentSpotIndex + 1];
+                const nextTargetCoordinates = `次の目標緯度: ${nextSpot.latitude.toFixed(6)}, 次の目標経度: ${nextSpot.longitude.toFixed(6)}`;
+                coordinatesText.innerText += `\n${nextTargetCoordinates}`;
+            }
+
+            if (distance <= targetRadius) {
+                currentSpotIndex++;
+                alerted = false;
+                if (currentSpotIndex >= targetSpots.length) {
+                    stopTour();
+                }
+            }
+        },
+        (error) => {
+            console.error('位置情報の取得に失敗しました。', error);
+        },
+        { enableHighAccuracy: true }
+    );
+}
+
+function stopTour() {
+    const startButton = document.getElementById('startTour');
+    const stopButton = document.getElementById('stopTour');
+    const statusText = document.getElementById('status');
+    const coordinatesText = document.getElementById('coordinates');
+
+    startButton.style.display = 'inline';
+    stopButton.style.display = 'none';
+    statusText.innerText = '';
+    coordinatesText.innerText = 'ツアーを中断しました';
+
+    navigator.geolocation.clearWatch(watchId);
+    alerted = false;
+    currentSpotIndex = 0;
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = degToRad(lat2 - lat1);
+    const dLon = degToRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance;
+}
+
+function degToRad(deg) {
+    return deg * (Math.PI / 180);
+}
+</script>
+
+</body>
+</html>
