@@ -8,13 +8,15 @@
         body,button {
             font-size: 120%;
             text-align: center;
-            margin-top: 50px;
+            margin: 12px; /* 余白をなくす */
         }
-    body {
-      background-color: yellow; /* 背景色を黄色に設定 */
-      margin: 10px; /* 余白をなくす */
-    }
-
+        body {
+            background-color: yellow; /* 背景色を黄色に設定 */
+            margin-top: 20px;
+        }
+        p{
+            margin:12px;
+        }
         #status {
             font-weight: bold;
         }
@@ -49,7 +51,7 @@
 <button id="stopTour" onclick="stopTour()" style="display:none;">ツアーを終了</button>
 <p><button id="stopbgmBTN" onclick="stopBGM()" style="display:none;">BGMを止める</button></p>
 <p id="mess">ツアーを開始しよう。</p>
-<p id="status">※サンプルツアーです。</p>
+<p><a id="status" href="https://maps.google.com">Googleマップで行き先を見るよ</a></p>
 <p id="imageContainer"><img id="myImage" src="/panpan/tour.jpg" alt="ツアー" width="280" /></p>
 <p id="coordinates">目標との差分:</p>
 
@@ -83,11 +85,28 @@ const targetSpots = [
 
 // 各地点に対応するメッセージの配列
 const spotMessages = [
-    '目標：スタート地点をめざそう！',
-    '目標：宝箱をさがそう',
-    '目標：ゴールをめざそう',
+    'スタート地点をめざそう！',
+    '宝箱をさがそう',
+    'スタートに戻ろう',
     'ツアーお疲れ様！アンケートに答えてね！'
 ];
+
+// マップ指示
+const mapUrl = [
+    'https://maps.app.goo.gl/DnYLchbfheYKYtQWA',
+    'https://maps.app.goo.gl/b6nefJ5YXWq98U8x9',
+    'https://maps.app.goo.gl/DnYLchbfheYKYtQWA',
+    'https://www.google.com/'
+];
+
+// マップ指示
+const mapName = [
+    'マップを開く→スタート地点',
+    'マップを開く→宝箱',
+    'マップを開く→ゴール',
+    'ツアーお疲れ様！アンケートに答えてね！'
+];
+
 
 let currentSpotIndex = 0;
 const targetRadius = 5;
@@ -136,7 +155,12 @@ function startTour() {
     const message = spotMessages[messageIndex];
     messText.innerText = message;
 
-    statusText.innerText = '※ツアー中は歩きスマホはやめてね';
+    const mapIndex = currentSpotIndex;
+    const maplink = mapUrl[mapIndex];
+    const map = mapName[mapIndex];
+    statusText.innerText = map;
+    statusText.href = maplink;
+
     imageElement.src = imagePaths[currentSpotIndex];
 
 
@@ -150,15 +174,22 @@ function startTour() {
 
             const targetCoordinates = `目標緯度: ${currentSpot.latitude.toFixed(6)},目標経度: ${currentSpot.longitude.toFixed(6)}\n`;
 
-            const currentCoordinates = `緯度: ${latitude.toFixed(6)},経度: ${longitude.toFixed(6)},\n 差分: ${distance.toFixed(2)} メートル\n`;
+            const currentCoordinates = `緯度: ${latitude.toFixed(6)},経度: ${longitude.toFixed(6)},\n [残り: ${distance.toFixed(2)} メートル]\n`;
 
-            coordinatesText.innerText = `${currentCoordinates}\n${targetCoordinates}`;
+            coordinatesText.innerText = `${currentCoordinates}`;
 
 // エリア侵入
             if (distance <= targetRadius && !alerted) {
+
                 const messageIndex = currentSpotIndex;
                 const message = spotMessages[messageIndex +1 ];
                 messText.innerText = message;
+
+                const mapIndex = currentSpotIndex;
+                const maplink = mapUrl[mapIndex +1 ];
+                const map = mapName[mapIndex +1 ];
+                statusText.innerText = map;
+                statusText.href = maplink;
 
                 playAudio(`000${messageIndex + 1}.mp3`);
                 imageElement.src = imagePaths[currentSpotIndex +1 ];
@@ -168,7 +199,7 @@ function startTour() {
                 // 次の目標の緯度経度を表示
                 const nextSpot = targetSpots[currentSpotIndex + 1];
                 const nextTargetCoordinates = `次の目標緯度: ${nextSpot.latitude.toFixed(6)}, 次の目標経度: ${nextSpot.longitude.toFixed(6)}`;
-                coordinatesText.innerText += `${nextTargetCoordinates}`;
+                //coordinatesText.innerText += `${nextTargetCoordinates}`;
 
             }
 
@@ -201,7 +232,7 @@ function stopTour() {
     stopButton.style.display = 'none';
     stopbgmBTN.style.display = 'inline';
 
-    statusText.innerText = 'statusツアー制作：カグア！';
+    statusText.innerText = 'ツアー制作：カグア！';
     coordinatesText.innerText = 'ツアーを終了です！お疲れ様でした。';
 
     navigator.geolocation.clearWatch(watchId);
