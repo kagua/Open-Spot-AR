@@ -48,13 +48,32 @@
 <button id="startTour" onclick="startTour()">ツアーを開始する</button>
 <button id="stopTour" onclick="stopTour()" style="display:none;">ツアーを終了</button>
 <p><button id="stopbgmBTN" onclick="stopBGM()" style="display:none;">BGMを止める</button></p>
-<p id="mess"></p>
-<p id="status"></p>
-<p id="coordinates">緯度: 経度: 差分: <br/> 目標緯度: 目標経度: 目標との差分: </p>
+<p id="mess">ツアーを開始しよう。</p>
+<p id="status">※サンプルツアーです。</p>
+<p id="imageContainer"><img id="myImage" src="/panpan/tour.jpg" alt="ツアー" width="280" /></p>
+<p id="coordinates">目標との差分:</p>
 
 <script>
 let watchId;
 let alerted = false;
+
+// 各地点で表示する画像
+const imagePaths = [
+    '/panpan/0000.jpg',
+    '/panpan/0001.jpg',
+    '/panpan/0002.jpg',
+    '/panpan/0003.jpg'
+];
+
+const imageElement = document.getElementById('myImage');
+
+// 画像をプリロード
+function preloadImages() {
+    for (let i = 0; i < imagePaths.length; i++) {
+      const img = new Image();
+      img.src = imagePaths[i];
+    }
+}
 
 const targetSpots = [
     { latitude: 35.8386737, longitude: 139.5858670 },
@@ -64,12 +83,11 @@ const targetSpots = [
 
 // 各地点に対応するメッセージの配列
 const spotMessages = [
-    'スタート地点です。',
-    '宝箱をみつけた！\nゴールに戻ろう。',
-    'ゴールです！\nこれで終了です。\nお疲れ様でした！'
+    '目標：スタート地点をめざそう！',
+    '目標：宝箱をさがそう',
+    '目標：ゴールをめざそう',
+    'ツアーお疲れ様！アンケートに答えてね！'
 ];
-
-
 
 let currentSpotIndex = 0;
 const targetRadius = 5;
@@ -99,19 +117,28 @@ function startTour() {
     const startButton = document.getElementById('startTour');
     const stopButton = document.getElementById('stopTour');
     const statusText = document.getElementById('status');
-    const coordinatesText = document.getElementById('coordinates');
     const messText = document.getElementById('mess');
     const stopbgmBTN = document.getElementById('stopbgmBTN');
+    const coordinatesText = document.getElementById('coordinates');
 
 //オープニングメッセージ
+
+    alert('歩きスマホはしないで下さい');
+
     startBGM();
     playAudio(`0000.mp3`);
-    alert('歩きスマホはしないで下さい');
 
     startButton.style.display = 'none';
     stopButton.style.display = 'inline';
     stopbgmBTN.style.display = 'none';
-    statusText.innerText = '計測中・・・';
+
+    const messageIndex = currentSpotIndex;
+    const message = spotMessages[messageIndex];
+    messText.innerText = message;
+
+    statusText.innerText = '※ツアー中は歩きスマホはやめてね';
+    imageElement.src = imagePaths[currentSpotIndex];
+
 
 // メインルーチン（ループ）
     watchId = navigator.geolocation.watchPosition(
@@ -121,24 +148,27 @@ function startTour() {
             const currentSpot = targetSpots[currentSpotIndex];
             const distance = calculateDistance(latitude, longitude, currentSpot.latitude, currentSpot.longitude);
 
-            const targetCoordinates = `目標緯度: ${currentSpot.latitude.toFixed(6)},\n 目標経度: ${currentSpot.longitude.toFixed(6)}\n`;
-            const currentCoordinates = `緯度: ${latitude.toFixed(6)},\n 経度: ${longitude.toFixed(6)},\n 差分: ${distance.toFixed(2)} メートル\n\n, 目標との差分: ${targetRadius.toFixed(2)} メートル\n`;
+            const targetCoordinates = `目標緯度: ${currentSpot.latitude.toFixed(6)},目標経度: ${currentSpot.longitude.toFixed(6)}\n`;
+
+            const currentCoordinates = `緯度: ${latitude.toFixed(6)},経度: ${longitude.toFixed(6)},\n 差分: ${distance.toFixed(2)} メートル\n`;
 
             coordinatesText.innerText = `${currentCoordinates}\n${targetCoordinates}`;
 
 // エリア侵入
             if (distance <= targetRadius && !alerted) {
                 const messageIndex = currentSpotIndex;
-                const message = spotMessages[messageIndex];
-
+                const message = spotMessages[messageIndex +1 ];
                 messText.innerText = message;
+
                 playAudio(`000${messageIndex + 1}.mp3`);
+                imageElement.src = imagePaths[currentSpotIndex +1 ];
+
                 alerted = true;
 
                 // 次の目標の緯度経度を表示
                 const nextSpot = targetSpots[currentSpotIndex + 1];
                 const nextTargetCoordinates = `次の目標緯度: ${nextSpot.latitude.toFixed(6)}, 次の目標経度: ${nextSpot.longitude.toFixed(6)}`;
-                coordinatesText.innerText += `\n${nextTargetCoordinates}`;
+                coordinatesText.innerText += `${nextTargetCoordinates}`;
 
             }
 
@@ -163,14 +193,16 @@ function stopTour() {
     const startButton = document.getElementById('startTour');
     const stopButton = document.getElementById('stopTour');
     const stopbgmBTN = document.getElementById('stopbgmBTN');
+    const messText = document.getElementById('mess');
     const statusText = document.getElementById('status');
     const coordinatesText = document.getElementById('coordinates');
 
-    startButton.style.display = 'inline';
+    startButton.style.display = 'none';
     stopButton.style.display = 'none';
     stopbgmBTN.style.display = 'inline';
-    statusText.innerText = '';
-    coordinatesText.innerText = 'ツアーを終了しました。\nお疲れ様でした。';
+
+    statusText.innerText = 'statusツアー制作：カグア！';
+    coordinatesText.innerText = 'ツアーを終了です！お疲れ様でした。';
 
     navigator.geolocation.clearWatch(watchId);
     alerted = false;
