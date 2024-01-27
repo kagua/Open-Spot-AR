@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>宝物を探せ！</title>
+    <title>志木市役所前かっぱめぐり</title>
     <style>
         body,button {
             font-size: 120%;
@@ -27,28 +27,12 @@
 	    margin:0;padding:0;
 	}
     </style>
-
-<!-- ◆セリフのプリロード -->
-    <link rel="preload" href="/panpan/0000.mp3" as="audio">
-    <link rel="preload" href="/panpan/0001.mp3" as="audio">
-    <link rel="preload" href="/panpan/0002.mp3" as="audio">
-    <link rel="preload" href="/panpan/0003.mp3" as="audio">
-    <audio id="audioPlayer" preload="auto"></audio>
-
-    <link rel="preload" href="/panpan/bgm0000.mp3" as="audio">
-    <audio id="bgm0000" loop>
-        <source src="/panpan/bgm0000.mp3" type="audio/mp3">
-    </audio>
-
-
 </head>
 <body>
-<h1>宝物をさがせ！</h1>
+<h1>かっぱをさがせ！</h1>
 
 <button id="startTour" onclick="startTour()">ツアーを開始する</button>
 <button id="stopTour" onclick="stopTour()" style="display:none;">ツアーを終了</button>
-<p><button id="stopbgmBTN" onclick="stopBGM()" style="display:none;">BGMを止める</button></p>
-<p id="mess"></p>
 <p id="status"></p>
 <p id="coordinates">緯度: 経度: 差分: <br/> 目標緯度: 目標経度: 目標との差分: </p>
 
@@ -56,42 +40,31 @@
 let watchId;
 let alerted = false;
 
+// 埼玉県志木市市役所前にあるかっぱ像の緯度経度（スタートとゴールは同じ）
 const targetSpots = [
-    { latitude: 35.8386737, longitude: 139.5858670 },
-    { latitude: 35.8387419, longitude: 139.5860916 },
-    { latitude: 35.8386737, longitude: 139.5858670 }
+    { latitude: 35.835914, longitude: 139.580820 },
+    { latitude: 35.835537, longitude: 139.582602 },
+    { latitude: 35.836338, longitude: 139.580848 },
+    { latitude: 35.835556, longitude: 139.581087 },
+    { latitude: 35.835595, longitude: 139.581275 },
+    { latitude: 35.835914, longitude: 139.580820 }
 ];
 
 // 各地点に対応するメッセージの配列
 const spotMessages = [
     'スタート地点です。',
-    '宝箱をみつけた！\nゴールに戻ろう。',
+    'イロハガッパ喋喋喃喃',
+    '遠い記憶－波動',
+    '宙太郎',
+    'ユーユーとスイスイくん',
     'ゴールです！\nこれで終了です。\nお疲れ様でした！'
 ];
 
+// ...
 
 
 let currentSpotIndex = 0;
 const targetRadius = 5;
-
-// MP3再生関数
-function playAudio(audioFile) {
-    const audioPlayer = document.getElementById('audioPlayer');
-    audioPlayer.src = audioFile;
-    audioPlayer.play();
-}
-
-// BGM再生
-    const bgm = document.getElementById('bgm');
-
-function startBGM() {
-    bgm0000.play();
-}
-
-function stopBGM() {
-    bgm0000.pause();
-    bgm0000.currentTime = 0;  // 停止したら再生位置をリセット
-}
 
 
 // ツアー開始
@@ -100,17 +73,11 @@ function startTour() {
     const stopButton = document.getElementById('stopTour');
     const statusText = document.getElementById('status');
     const coordinatesText = document.getElementById('coordinates');
-    const messText = document.getElementById('mess');
-    const stopbgmBTN = document.getElementById('stopbgmBTN');
 
-//オープニングメッセージ
-    startBGM();
-    playAudio(`0000.mp3`);
     alert('歩きスマホはしないで下さい');
 
     startButton.style.display = 'none';
     stopButton.style.display = 'inline';
-    stopbgmBTN.style.display = 'none';
     statusText.innerText = '計測中・・・';
 
 // メインルーチン（ループ）
@@ -128,19 +95,18 @@ function startTour() {
 
 // エリア侵入
             if (distance <= targetRadius && !alerted) {
+
                 const messageIndex = currentSpotIndex;
                 const message = spotMessages[messageIndex];
-
-                messText.innerText = message;
-                playAudio(`000${messageIndex + 1}.mp3`);
+                alert(message);
                 alerted = true;
 
                 // 次の目標の緯度経度を表示
                 const nextSpot = targetSpots[currentSpotIndex + 1];
                 const nextTargetCoordinates = `次の目標緯度: ${nextSpot.latitude.toFixed(6)}, 次の目標経度: ${nextSpot.longitude.toFixed(6)}`;
                 coordinatesText.innerText += `\n${nextTargetCoordinates}`;
-
             }
+
 
 // 終了判定
             if (distance <= targetRadius) {
@@ -162,15 +128,13 @@ function startTour() {
 function stopTour() {
     const startButton = document.getElementById('startTour');
     const stopButton = document.getElementById('stopTour');
-    const stopbgmBTN = document.getElementById('stopbgmBTN');
     const statusText = document.getElementById('status');
     const coordinatesText = document.getElementById('coordinates');
 
     startButton.style.display = 'inline';
     stopButton.style.display = 'none';
-    stopbgmBTN.style.display = 'inline';
     statusText.innerText = '';
-    coordinatesText.innerText = 'ツアーを終了しました。\nお疲れ様でした。';
+    coordinatesText.innerText = 'ツアーを中断しました';
 
     navigator.geolocation.clearWatch(watchId);
     alerted = false;
@@ -195,8 +159,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 function degToRad(deg) {
     return deg * (Math.PI / 180);
 }
-
-
 </script>
 <p><a rel="nofollow" href="/panpan/index.html"><strong>トップ</strong></a>　|　<a rel="nofollow" href="/panpan/map.html"><strong>判定</strong></a>　|　<a rel="nofollow" href="/panpan/record.html"><strong>記録</strong></a>　|　<a rel="nofollow" href="/panpan/geo.html"><strong>試験</strong></a>　|　<a rel="nofollow" href="/panpan/kappa.html"><strong>かっぱ</strong></a></p>
 

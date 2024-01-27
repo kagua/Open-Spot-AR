@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>エリア判定</title>
+  <style>
+    body {
+      background-color: yellow; /* 背景色を黄色に設定 */
+      margin: 0; /* 余白をなくす */
+    }
+    .container {
+      display: flex;
+      flex-direction: column; /* 縦方向の並び */
+      justify-content: center; /* 水平方向の中央揃え */
+      align-items: center; /* 垂直方向の中央揃え */
+      height: 80vh; /* コンテナの高さをビューポートの高さに設定 */
+    }
+    #check {
+      font-size: 18pt;
+      background-color: purple; /* ボタンの背景色を紫に設定 */
+      color: white; /* ボタンのテキスト色を白に設定 */
+      border: none; /* 枠線を削除 */
+      padding: 10px 20px; /* パディングを設定 */
+      border-radius: 5px; /* ボタンの角を丸くする */
+    }
+    #check:hover {
+      background-color: #7d00ff; /* ホバー時のボタンの背景色を変更 */
+    }
+    .text {
+      font-size: 24pt;
+      color: black; /* テキストの色を黒に設定 */
+      margin-bottom: 18pt; /* ボタンとの間のマージン */
+    }
+    button{
+      font-size: 14pt;
+    }
+    .small {
+      font-size: 12pt;
+      color: black; /* テキストの色を黒に設定 */
+      margin-bottom: 12pt; /* ボタンとの間のマージン */
+    }
+  </style>
+</head>
+
+<body>
+
+<body>
+  <div class="container">
+    <div class="text">エリア判定開始<br/>（50m以内でビンゴ）</div>
+
+<button id="toggleButton" onclick="toggleLocationWatch()">ツアーを開始する</button><br/>
+<div id="spot">エリア外です</div>
+
+    <div class="text"></div>
+    <div class="text"><img src="mopin1.jpg" width="180"/></div>
+<div class="small">※エリア内に入ると計測停止</div>
+  </div>
+
+<!-- オーディオ要素の定義。ここでMP3ファイルを指定します -->
+<audio id="myAudio" preload="auto"><source src="sample-voice.mp3" type="audio/mpeg">お使いのブラウザはaudio要素をサポートしていません。</audio>
+
+
+<script>
+// ページが完全に読み込まれた後に実行される関数
+function audioplay() {
+      // オーディオを再生する
+          var audio = document.getElementById('myAudio');
+          audio.play();
+};
+
+
+let isWatching = false;
+let isInsideArea = false;
+let watchId = null;
+
+function toggleLocationWatch() {
+  const toggleButton = document.getElementById('toggleButton');
+  if (!isWatching) {
+    startLocationWatch();
+    toggleButton.textContent = '計測中...';
+  } else {
+    stopLocationWatch();
+    toggleButton.textContent = 'ツアーを開始する';
+  }
+}
+
+function startLocationWatch() {
+const targetLatitude = 35.8387419; // 例: 東京の緯度
+const targetLongitude = 139.5860916; // 例: 東京の経度
+const targetRadius = 10; // 例: 50メートル
+
+  watchId = navigator.geolocation.watchPosition(
+    (position) => {
+      const currentLatitude = position.coords.latitude;
+      const currentLongitude = position.coords.longitude;
+
+      const distance = calculateDistance(
+        currentLatitude,
+        currentLongitude,
+        targetLatitude,
+        targetLongitude
+      );
+
+      if (distance <= targetRadius && !isInsideArea) {
+        // エリア内に入った場合
+        isInsideArea = true;
+        document.getElementById('spot').textContent = '範囲に入った！エリア内です。';audioplay();
+      } else if (distance > targetRadius && isInsideArea) {
+        // エリア外に出た場合
+        isInsideArea = false;
+        document.getElementById('spot').textContent = 'エリア外です';
+      }
+    },
+    (error) => {
+      console.error(`ジオロケーションエラー: ${error.message}`);
+    }
+  );
+
+  isWatching = true;
+}
+
+function stopLocationWatch() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    isWatching = false;
+    document.getElementById('spot').textContent = 'ツアーを終了しました。お疲れ様でした。';
+  } else {
+    document.getElementById('spot').textContent = '位置情報の監視はすでに停止しています';
+  }
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // 地球の半径（メートル）
+  const dLat = degToRad(lat2 - lat1);
+  const dLon = degToRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(degToRad(lat1)) *
+      Math.cos(degToRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return distance;
+}
+
+function degToRad(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+</script>
+<p><a rel="nofollow" href="/panpan/index.html"><strong>トップ</strong></a>　|　<a rel="nofollow" href="/panpan/map.html"><strong>判定</strong></a>　|　<a rel="nofollow" href="/panpan/record.html"><strong>記録</strong></a>　|　<a rel="nofollow" href="/panpan/geo.html"><strong>試験</strong></a>　|　<a rel="nofollow" href="/panpan/kappa.html"><strong>かっぱ</strong></a></p>
+
+</body>
+</html>
