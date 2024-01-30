@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+}
+
+p {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+}
+
+button {
+    font-size:130%;
+    text-align: center;
+    margin: 0px;
+    padding:5px;
+}
+
+body {
+    background-color: #FFEEAA; /* 背景色を黄色に設定 */
+    margin-top: 20px;
+    text-align: center;
+}
+p{
+    margin:12px;
+    margin-top:0px;
+}
+#status {
+    font-weight: bold;
+}
+
+#coordinates {
+    margin-top: 20px;
+}
+
+h1{
+    text-align:center;
+    margin:0;padding:0;
+}
+
+#status {
+    display: inline-block;
+    padding: 10px;
+    background-color: #B0E2FF; /* 薄いブルーの背景色 */
+    border-radius: 10px; /* 角を丸くするための値 */
+    position: relative;
+}
+
+#status::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    border-width: 8px; /* 吹き出しの尖った部分のサイズ */
+    border-top-color: #B0E2FF; /* 薄いブルーの背景色と合わせる */
+    transform: translateX(-50%); /* 水平方向に中央揃え */
+}
+
+#mess {
+    display: inline-block;
+    padding: 10px;
+    background-color: #FFFFFF;
+    border-radius: 10px; /* 角を丸くするための値 */
+    position: relative;
+    text-align:left;
+    font-size:80%;
+}
+
+#mess::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    border: solid transparent;
+    border-width: 8px; /* 吹き出しの尖った部分のサイズ */
+    border-top-color: #FFFFFF; 
+    transform: translateX(-50%); /* 水平方向に中央揃え */
+}
+
+#coordinates {
+    display: inline-block;
+    padding: 10px;
+    background-color: #FFFFFF; 
+    border-radius: 10px; /* 角を丸くするための値 */
+    position: relative;
+    margin-top:0px;
+}
+
+#coordinates::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    border: solid transparent;
+    border-width: 8px; /* 吹き出しの尖った部分のサイズ */
+    border-bottom-color: #FFFFFF; 
+    transform: translateX(-50%); /* 水平方向に中央揃え */
+}
+
+h1 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    font-size:18pt;
+    background-color: #f8f8f8; /* 固定ヘッダーの背景色 */
+    padding: 10px;
+    text-align: center;
+    background-color: #d2b48c; /* ベージュの背景色 */
+    z-index: 1000; /* 他の要素よりも前面に表示するための z-index */
+}
+
+#space {
+    margin: 25px;
+}
+
+#myImage {
+    border-radius: 20px; /* 丸くする角の半径（ピクセルで指定） */
+    box-shadow: 5px 7px 5px rgba(0, 0, 0, 0.1);
+}

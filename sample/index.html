@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 入力する箇所は13箇所です ◆のところを変えて下さい。
+ スポットは任意の数を増やせます（最小はスタートとゴール）
+ 配列に記入するところなどは最後にカンマを入れないなど注意して下さい 
+ @creator_enews MIT License 
+ https://github.com/kagua/Open-Spot-AR
+ ヘルプ https://otowa.kyouzai.com/help/
+ creevo AI made music is public domain
+ supported by ChatGPT
+ https://creevo-music.com/ -->
+
+<title>もぴんとテスト散歩</title>
+<!-- ◆ツアー名を記入 -->
+
+<link rel='stylesheet' href='./style.css' type='text/css' media='all' />
+
+<!-- ◆音声MP3を記入（プリロード用） -->
+    <link rel="preload" href="./00.mp3" as="audio">
+    <link rel="preload" href="./01.mp3" as="audio">
+    <link rel="preload" href="./02.mp3" as="audio">
+    <audio id="audioPlayer" preload="auto"></audio>
+
+    <link rel="preload" href="./bgm0000.mp3" as="audio">
+    <audio id="bgm0000" loop>
+        <source src="./bgm0000.mp3" type="audio/mp3">
+    </audio>
+
+
+</head>
+<body>
+<h1>もぴんとテスト散歩</h1><!-- ◆ H1タイトルを記入（15文字） -->
+<div id="space">　</div>
+<button id="startTour" onclick="startTour()">ツアーを開始する</button>
+<button id="stopTour" onclick="stopTour()" style="display:none;">ツアーを終了</button>
+<p><button id="stopbgmBTN" onclick="stopBGM()" style="display:none;">BGMを止める</button></p>
+<p id="mess">スタート地点についたら、ツアーを開始してね！</p>
+
+<p><a id="status" href="https://maps.app.goo.gl/svrnvTpTFceEa4C9A">→ スタート場所（中宗岡）</a></p><!-- ◆ スタート地点と◆そのGoogleマップURLを記入 -->
+
+<p id="imageContainer"><img id="myImage" src="./tour.jpg" alt="ツアー" width="280" /></p>
+<p id="coordinates">目標地との距離の差分はここを見てね</p>
+
+<script>
+let watchId;
+let alerted = false;
+
+// ◆各地点で表示する画像を記入 ※スタート地点、スポット１、スポット２・・・
+// 画像は280x280 JPG 推奨
+const imagePaths = [
+    './00.jpg',
+    './01.jpg',
+    './02.jpg'
+];
+
+const imageElement = document.getElementById('myImage');
+
+// 画像をプリロード
+function preloadImages() {
+    for (let i = 0; i < imagePaths.length; i++) {
+      const img = new Image();
+      img.src = imagePaths[i];
+    }
+}
+
+// ◆各スポットの緯度経度を記入 ※スポット１、スポット２・・・
+// 緯度経度はGoogleマップで右クリックでコピーする
+const targetSpots = [
+    { latitude: 35.83850196145268, longitude: 139.58594834578963 },
+    { latitude: 35.83827730992454, longitude: 139.5860521973704 }
+];
+
+// ◆各地点のメッセージを記入 ※スタート地点、スポット１、スポット２・・・
+const spotMessages = [
+    'よお！ここが中宗岡だもぴ。さあ右へ行こう。',
+    '電柱についたよ。ヤマヤまではすぐだ。',
+    'ゴールもぴよ！お疲れ様です。'
+];
+
+// ◆目指す地点を記入 ※スポット１、スポット２・・・ゴールでしてほしいこと
+const mapName = [
+    '→ 電柱',
+    '→ ヤマヤ',
+    '→ 感想を送る'
+];
+
+// ◆GoogleマップのURLを記入 ※スポット１、スポット２・・・アンケート
+// Googleマップ上を強引にクリックするとピンを作れるので共有からリンクをコピー
+const mapUrl = [
+    'https://maps.app.goo.gl/j44qAKxgCCPedRNW7',
+    'https://maps.app.goo.gl/ckMEm2JeEgVLWw3k6',
+    'https://forms.gle/ULDgqVcwsbZbDiVP6'
+];
+
+
+let currentSpotIndex = 0;
+const targetRadius = 5;
+
+// MP3再生関数
+function playAudio(audioFile) {
+    const audioPlayer = document.getElementById('audioPlayer');
+    audioPlayer.src = audioFile;
+    audioPlayer.play();
+}
+
+// BGM再生
+    const bgm = document.getElementById('bgm');
+
+function startBGM() {
+    bgm0000.play();
+}
+
+function stopBGM() {
+    bgm0000.pause();
+    bgm0000.currentTime = 0;  // 停止したら再生位置をリセット
+}
+
+
+// ツアー開始
+function startTour() {
+    const startButton = document.getElementById('startTour');
+    const stopButton = document.getElementById('stopTour');
+    const statusText = document.getElementById('status');
+    const messText = document.getElementById('mess');
+    const stopbgmBTN = document.getElementById('stopbgmBTN');
+    const coordinatesText = document.getElementById('coordinates');
+
+//オープニングメッセージ
+
+//◆オープニングに表示させたい注意事項を記入
+    alert('歩きスマホはしないで下さい');
+
+    startBGM();
+    playAudio(`00.mp3`);
+
+    startButton.style.display = 'none';
+    stopButton.style.display = 'inline';
+    stopbgmBTN.style.display = 'none';
+
+    const messageIndex = currentSpotIndex;
+    const message = spotMessages[messageIndex];
+    messText.innerText = message;
+
+    const mapIndex = currentSpotIndex;
+    const maplink = mapUrl[mapIndex];
+    const map = mapName[mapIndex];
+    statusText.innerText = map;
+    statusText.href = maplink;
+
+    imageElement.src = imagePaths[currentSpotIndex];
+
+
+// メインルーチン（ループ）
+    watchId = navigator.geolocation.watchPosition(
+        (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const currentSpot = targetSpots[currentSpotIndex];
+            const distance = calculateDistance(latitude, longitude, currentSpot.latitude, currentSpot.longitude);
+
+            const targetCoordinates = `目標緯度: ${currentSpot.latitude.toFixed(6)},目標経度: ${currentSpot.longitude.toFixed(6)}\n`;
+
+            const currentCoordinates = `緯度: ${latitude.toFixed(6)},経度: ${longitude.toFixed(6)},\n [残り: ${distance.toFixed(2)} メートル]\n`;
+
+            coordinatesText.innerText = `${currentCoordinates}`;
+
+// エリア侵入
+            if (distance <= targetRadius && !alerted) {
+
+                const messageIndex = currentSpotIndex;
+                const message = spotMessages[messageIndex +1 ];
+                messText.innerText = message;
+
+                const mapIndex = currentSpotIndex;
+                const maplink = mapUrl[mapIndex +1 ];
+                const map = mapName[mapIndex +1 ];
+                statusText.innerText = map;
+                statusText.href = maplink;
+
+                playAudio(`0${messageIndex + 1}.mp3`);
+                imageElement.src = imagePaths[currentSpotIndex +1 ];
+
+                alerted = true;
+
+                // 次の目標の緯度経度を表示
+                const nextSpot = targetSpots[currentSpotIndex + 1];
+                const nextTargetCoordinates = `次の目標緯度: ${nextSpot.latitude.toFixed(6)}, 次の目標経度: ${nextSpot.longitude.toFixed(6)}`;
+                //coordinatesText.innerText += `${nextTargetCoordinates}`;
+
+            }
+
+// 終了判定
+            if (distance <= targetRadius) {
+                currentSpotIndex++;
+                alerted = false;
+                if (currentSpotIndex >= targetSpots.length) {
+                    stopTour();
+                }
+            }
+        },
+        (error) => {
+            console.error('位置情報の取得に失敗しました。', error);
+        },
+        { enableHighAccuracy: true }
+    );
+}
+
+// ツアー終了
+function stopTour() {
+    const startButton = document.getElementById('startTour');
+    const stopButton = document.getElementById('stopTour');
+    const stopbgmBTN = document.getElementById('stopbgmBTN');
+    const messText = document.getElementById('mess');
+    const statusText = document.getElementById('status');
+    const coordinatesText = document.getElementById('coordinates');
+
+    startButton.style.display = 'none';
+    stopButton.style.display = 'none';
+    stopbgmBTN.style.display = 'inline';
+
+//◆ ツアー終了（リンク）メッセージを記入
+    statusText.innerText = 'ツアー制作：カグア！';
+
+//◆ 画像下にも終了メッセージを記入
+    coordinatesText.innerText = 'ツアーを終了です！お疲れ様でした。';
+
+    navigator.geolocation.clearWatch(watchId);
+    alerted = false;
+    currentSpotIndex = 0;
+}
+
+
+// 緯度経度計算
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = degToRad(lat2 - lat1);
+    const dLon = degToRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance;
+}
+
+function degToRad(deg) {
+    return deg * (Math.PI / 180);
+}
+
+
+</script>
+
+</body>
+</html>
