@@ -1,28 +1,59 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>スタンプラリー</title>
 <style>
     /* リストのスタイル */
-    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap');
     body {
-        font-family: 'Open Sans', sans-serif;
+        font-family: 'Kosugi Maru', sans-serif;
+        padding-top: 50px; /* ヘッダーの高さと同じ値を指定 */
+        background-color: #FFEEAA; /* 背景色を黄色に設定 */
     }
     #spotsList {
-        padding: 20px;
+        padding-left: 40px;
     }
     #spotsList li {
         list-style-type: decimal;
         color: black;
+        line-height:1.5;
     }
+    #tourButton,#completeButton{
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        color: #fff;
+        background-color: #ffa500;
+        border: 2px solid #ffa500;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        font-size:18pt;
+        background-color: #f8f8f8; /* 固定ヘッダーの背景色 */
+        padding: 15px 0;
+        text-align:center;
+        margin:0;
+        background-color: #d2b48c; /* ベージュの背景色 */
+        z-index: 1000; /* 他の要素よりも前面に表示するための z-index */
+    }
+
 </style>
 </head>
 <body>
-    <h2>スタンプラリー</h2>
+    <h1>スタンプラリー</h1>
     <!-- ツアー開始/中断ボタン -->
+    <p>すべてのスポットをまわろう！<br/>ブラウザは閉じないでね。</p>
     <button id="tourButton" onclick="toggleTour()">声ツアーを開始する</button>
     <!-- スポットリスト -->
     <ol id="spotsList"></ol>
@@ -65,6 +96,17 @@
             var spotAudio = new Audio(index + ".mp3");
             spotAudio.load();
         });
+
+        // スポット一覧表示
+            var spotsList = document.getElementById("spotsList");
+            spotsList.innerHTML = ""; // リストをクリア
+
+            spots.forEach(function(spot, index) {
+                var spotElement = document.createElement("li");
+                spotElement.id = "spot_" + index;
+                spotElement.innerText = spot.name;
+                spotsList.appendChild(spotElement);
+            });
 
         // ツアーの開始/中断を切り替える関数
         function toggleTour() {
@@ -176,7 +218,6 @@
 <p>　</p>
 <p>　</p>
 <hr>
-<p>copyright 2024</p>
-
+<p>2024 Open Spot AR</p>
 </body>
 </html>
