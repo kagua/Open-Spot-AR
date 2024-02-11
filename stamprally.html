@@ -53,7 +53,7 @@
 <body>
     <h1>スタンプラリー</h1>
     <!-- ツアー開始/中断ボタン -->
-    <p>すべてのスポットをまわろう！<br/>ブラウザは閉じないでね。</p>
+    <p>全スポットをまわろう！全て周るとご褒美メッセージが聴けるﾓﾋﾟよ。ブラウザは閉じないでね。</p>
     <button id="tourButton" onclick="toggleTour()">声ツアーを開始する</button>
     <!-- スポットリスト -->
     <ol id="spotsList"></ol>
@@ -67,14 +67,14 @@
     <p><img id="goalImage" style="display: none;" src="goal.jpg" alt="ゴール画像"></p>
 
     <script>
-        // スポット情報
+        // ★ スポット情報（緯度経度と名称）
         var spots = [
             { coords: { latitude: 35.83849919524573, longitude: 139.58592441971976 }, name: "やまや", audioPlayed: false, spotVisited: false },
             { coords: { latitude: 35.838826326760184, longitude: 139.5857641123797 }, name: "くるま", audioPlayed: false, spotVisited: false },
             { coords: { latitude: 35.83865155821823, longitude: 139.58584334419047 }, name: "電柱", audioPlayed: false, spotVisited: false }
         ];
 
-        // オーディオ要素の初期化　★ スポット数に合わせたMP3を用意
+        // オーディオ要素の初期化 ★ スポット数に合わせたMP3を用意
 　　　　//（例：スポット数が3箇所なら、0.mp3、1.mp3、2.mp3、と goal.mp3、bgm.mp3）
         var audio = new Audio();
         var bgm = new Audio("bgm.mp3");
@@ -91,6 +91,7 @@
         var lastPlayedSpotIndex = null;
         var completedSpots = [];
         var spotVisited = [];
+        var targetRadius = 5; // ★ スポット中心からの半径
 
         // スポット番号.mp3 をプリロード
         spots.forEach(function(spot, index) {
@@ -166,7 +167,7 @@
                 var spotName = spot.spotVisited ? "* " + spot.name : spot.name;
 
                 // スポットに近づいたら再生
-                if (distance <= 5 && !spot.audioPlayed) {
+                if (distance <= targetRadius && !spot.audioPlayed) {
                     var spotAudio = new Audio(index + ".mp3");
                     spotAudio.play();
                     spot.audioPlayed = true;
@@ -219,6 +220,6 @@
 <p>　</p>
 <p>　</p>
 <hr>
-<p>2024 Open Spot AR</p>
+<p>otowa.kyouzai.com</p>
 </body>
 </html>
