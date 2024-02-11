@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>スタンプラリー</title>
@@ -26,24 +34,26 @@
     <!-- スポットリスト -->
     <ol id="spotsList"></ol>
     <!-- 現在位置情報表示 -->
-    <p id="currentLocation"></p>
+    <p id="currentLocation">歩きスマホはしないでね。</p>
     <!-- 完了メッセージ -->
     <p id="completionMessage" style="display: none;">全てのスポットを回りました！</p>
     <!-- 完了ボタン -->
-    <button id="completeButton" style="display: none;" onclick="showGoal()">完了メッセージを聴く</button>
+    <button id="completeButton" style="display: none;" onclick="showGoal()">終了メッセージを聴く</button>
     <!-- ゴール画像 -->
-    <img id="goalImage" style="display: none;" src="goal.jpg" alt="ゴール画像">
+    <p><img id="goalImage" style="display: none;" src="goal.jpg" alt="ゴール画像"></p>
 
     <script>
         // スポット情報
         var spots = [
-            { coords: { latitude: 35.83849919524573, longitude: 139.58592441971976 }, name: "やまや", audioPlayed: false },
-            { coords: { latitude: 35.83865155821823, longitude: 139.58584334419047 }, name: "電柱", audioPlayed: false }
+            { coords: { latitude: 35.83849919524573, longitude: 139.58592441971976 }, name: "やまや", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.838826326760184, longitude: 139.5857641123797 }, name: "くるま", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.83865155821823, longitude: 139.58584334419047 }, name: "電柱", audioPlayed: false, spotVisited: false }
         ];
 
         // オーディオ要素の初期化
         var audio = new Audio();
         var bgm = new Audio("bgm.mp3");
+        bgm.loop = true; // BGMをループ再生
         var goalAudio = new Audio("goal.mp3");
 
         // メッセージと画像の初期化
@@ -55,6 +65,7 @@
         var watchID = null;
         var lastPlayedSpotIndex = null;
         var completedSpots = [];
+        var spotVisited = [];
 
         // スポット番号.mp3 をプリロード
         spots.forEach(function(spot, index) {
@@ -97,7 +108,7 @@
             spots.forEach(function(spot, index) {
                 var spotElement = document.createElement("li");
                 spotElement.id = "spot_" + index;
-                spotElement.innerText = spot.name;
+                spotElement.innerText = spotVisited ? "* " + spot.name : spot.name;
                 spotsList.appendChild(spotElement);
             });
         }
@@ -116,14 +127,14 @@
             spots.forEach(function(spot, index) {
                 var distance = calculateDistance(currentCoords, spot.coords);
                 var spotElement = document.getElementById("spot_" + index);
-                var spotName = spot.name;
+                var spotName = spot.spotVisited ? "* " + spot.name : spot.name;
 
                 // スポットに近づいたら再生
                 if (distance <= 5 && !spot.audioPlayed) {
                     var spotAudio = new Audio(index + ".mp3");
                     spotAudio.play();
                     spot.audioPlayed = true;
-                    spotName = "*" + spotName; // スポット名の前に * を追加
+                    spot.spotVisited = true; // スポットを訪れたとマーク
                     completedSpots.push(index); // スポットを完了として追加
                 }
 
@@ -165,7 +176,14 @@
         function showGoal() {
             document.getElementById("goalImage").style.display = "block";
             goalAudio.play();
+            bgm.loop = false; // BGMをループ停止
         }
     </script>
+
+<p>　</p>
+<p>　</p>
+<hr>
+<p><a rel="nofollow" href="/panpan/index.html"><strong>トップ</strong></a>　|　<a rel="nofollow" href="/panpan/map.html"><strong>判定</strong></a>　|　<a rel="nofollow" href="/panpan/record.html"><strong>記録</strong></a>　|　<a rel="nofollow" href="/panpan/geo.html"><strong>試験</strong></a>　|　<a rel="nofollow" href="/panpan/kappa.html"><strong>かっぱ</strong></a>|　<a rel="nofollow" href="/panpan/stamprally.html"><strong>スタンプ</strong></a></p>
+
 </body>
 </html>
