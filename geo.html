@@ -3,35 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>宝物を探せ！</title>
-    <style>
-        button {
-            font-size:130%;
-            text-align: center;
-            margin: 0px;
-            padding:5px;
-        }
+    <title>シーケンシャルエリアガイド</title>
 
-        body {
-            background-color: #FFEEAA; /* 背景色を黄色に設定 */
-            margin-top: 20px;
-            text-align: center;
-        }
-        p{
-            margin:12px;
-            margin-top:0px;
-        }
-        #status {
-            font-weight: bold;
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
 
-        #coordinates {
-            margin-top: 20px;
-        }
-	h1{
-	    text-align:center;
-	    margin:0;padding:0;
-	}
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+}
+
+p {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+}
+
+button {
+    font-size:130%;
+    text-align: center;
+    margin: 0px;
+    padding:5px;
+}
+
+body {
+    background-color: #FFEEAA; /* 背景色を黄色に設定 */
+    margin-top: 20px;
+    text-align: center;
+}
+p{
+    margin:12px;
+    margin-top:0px;
+}
+#status {
+    font-weight: bold;
+}
+
+#coordinates {
+    margin-top: 20px;
+}
+
+h1{
+    text-align:center;
+    margin:0;padding:0;
+}
 
 #status {
     display: inline-block;
@@ -58,6 +76,8 @@
     background-color: #FFFFFF;
     border-radius: 10px; /* 角を丸くするための値 */
     position: relative;
+    text-align:left;
+    font-size:80%;
 }
 
 #mess::before {
@@ -113,19 +133,18 @@ h1 {
     box-shadow: 5px 7px 5px rgba(0, 0, 0, 0.1);
 }
 
-    </style>
+</style>
 
 <!-- ◆セリフのプリロード -->
-    <link rel="preload" href="/panpan/0000.mp3" as="audio">
-    <link rel="preload" href="/panpan/0001.mp3" as="audio">
-    <link rel="preload" href="/panpan/0002.mp3" as="audio">
-    <link rel="preload" href="/panpan/0003.mp3" as="audio">
-    <audio id="audioPlayer" preload="auto"></audio>
+<link rel="preload" href="/panpan/0.mp3" as="audio">
+<link rel="preload" href="/panpan/1.mp3" as="audio">
+<link rel="preload" href="/panpan/2.mp3" as="audio">
+<audio id="audioPlayer" preload="auto"></audio>
 
-    <link rel="preload" href="/panpan/bgm0000.mp3" as="audio">
-    <audio id="bgm0000" loop>
-        <source src="/panpan/bgm0000.mp3" type="audio/mp3">
-    </audio>
+<link rel="preload" href="/panpan/bgm0000.mp3" as="audio">
+<audio id="bgm0000" loop>
+<source src="/panpan/bgm0000.mp3" type="audio/mp3">
+</audio>
 
 
 </head>
@@ -135,8 +154,8 @@ h1 {
 <button id="startTour" onclick="startTour()">ツアーを開始する</button>
 <button id="stopTour" onclick="stopTour()" style="display:none;">ツアーを終了</button>
 <p><button id="stopbgmBTN" onclick="stopBGM()" style="display:none;">BGMを止める</button></p>
-<p id="mess">ツアーの指示はここを見てね</p>
-<p><a id="status" href="https://maps.google.com">タップするとGoogleマップで行き先を見れるよ</a></p>
+<p id="mess">今着いた場所やしている行動が表示されるよ</p>
+<p><a id="status" href="https://maps.google.com">→ Googleマップで次の目的地をめざそう</a></p>
 <p id="imageContainer"><img id="myImage" src="/panpan/tour.jpg" alt="ツアー" width="280" /></p>
 <p id="coordinates">目標地との距離の差分はここを見てね</p>
 
@@ -170,9 +189,17 @@ const targetSpots = [
 
 // 各地点に対応するメッセージの配列
 const spotMessages = [
-    'スタート地点をめざそう！',
+    'ツアーを始まったよ。下のリンクをタップしてGoogleマップを開き、最初の目的地をめざそう。',
     '宝箱をさがそう',
     'スタートに戻ろう',
+    'ツアーお疲れ様！アンケートに答えてね！'
+];
+
+// マップ指示
+const mapName = [
+    '→ いろは親水公園',
+    'マップを開く→宝箱',
+    'マップを開く→ゴール',
     'ツアーお疲れ様！アンケートに答えてね！'
 ];
 
@@ -182,14 +209,6 @@ const mapUrl = [
     'https://maps.app.goo.gl/b6nefJ5YXWq98U8x9',
     'https://maps.app.goo.gl/DnYLchbfheYKYtQWA',
     'https://www.google.com/'
-];
-
-// マップ指示
-const mapName = [
-    'マップを開く→スタート地点',
-    'マップを開く→宝箱',
-    'マップを開く→ゴール',
-    'ツアーお疲れ様！アンケートに答えてね！'
 ];
 
 
@@ -251,56 +270,56 @@ function startTour() {
 
 // メインルーチン（ループ）
     watchId = navigator.geolocation.watchPosition(
-        (position) => {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-            const currentSpot = targetSpots[currentSpotIndex];
-            const distance = calculateDistance(latitude, longitude, currentSpot.latitude, currentSpot.longitude);
+(position) => {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    const currentSpot = targetSpots[currentSpotIndex];
+    const distance = calculateDistance(latitude, longitude, currentSpot.latitude, currentSpot.longitude);
 
-            const targetCoordinates = `目標緯度: ${currentSpot.latitude.toFixed(6)},目標経度: ${currentSpot.longitude.toFixed(6)}\n`;
+    const targetCoordinates = `目標緯度: ${currentSpot.latitude.toFixed(6)},目標経度: ${currentSpot.longitude.toFixed(6)}\n`;
 
-            const currentCoordinates = `緯度: ${latitude.toFixed(6)},経度: ${longitude.toFixed(6)},\n [残り: ${distance.toFixed(2)} メートル]\n`;
+    const currentCoordinates = `[残り: ${distance.toFixed(2)} メートル]\n緯度: ${latitude.toFixed(6)},経度: ${longitude.toFixed(6)},\n`;
 
-            coordinatesText.innerText = `${currentCoordinates}`;
+    coordinatesText.innerText = `${currentCoordinates}`;
 
 // エリア侵入
-            if (distance <= targetRadius && !alerted) {
+    if (distance <= targetRadius && !alerted) {
 
-                const messageIndex = currentSpotIndex;
-                const message = spotMessages[messageIndex +1 ];
-                messText.innerText = message;
+	const messageIndex = currentSpotIndex;
+	const message = spotMessages[messageIndex +1 ];
+	messText.innerText = message;
 
-                const mapIndex = currentSpotIndex;
-                const maplink = mapUrl[mapIndex +1 ];
-                const map = mapName[mapIndex +1 ];
-                statusText.innerText = map;
-                statusText.href = maplink;
+	const mapIndex = currentSpotIndex;
+	const maplink = mapUrl[mapIndex +1 ];
+	const map = mapName[mapIndex +1 ];
+	statusText.innerText = map;
+	statusText.href = maplink;
 
-                playAudio(`000${messageIndex + 1}.mp3`);
-                imageElement.src = imagePaths[currentSpotIndex +1 ];
+	playAudio(`000${messageIndex + 1}.mp3`);
+	imageElement.src = imagePaths[currentSpotIndex +1 ];
 
-                alerted = true;
+	alerted = true;
 
-                // 次の目標の緯度経度を表示
-                const nextSpot = targetSpots[currentSpotIndex + 1];
-                const nextTargetCoordinates = `次の目標緯度: ${nextSpot.latitude.toFixed(6)}, 次の目標経度: ${nextSpot.longitude.toFixed(6)}`;
-                //coordinatesText.innerText += `${nextTargetCoordinates}`;
+	// 次の目標の緯度経度を表示
+	const nextSpot = targetSpots[currentSpotIndex + 1];
+	const nextTargetCoordinates = `次の目標緯度: ${nextSpot.latitude.toFixed(6)}, 次の目標経度: ${nextSpot.longitude.toFixed(6)}`;
+	//coordinatesText.innerText += `${nextTargetCoordinates}`;
 
-            }
+    }
 
 // 終了判定
-            if (distance <= targetRadius) {
-                currentSpotIndex++;
-                alerted = false;
-                if (currentSpotIndex >= targetSpots.length) {
-                    stopTour();
-                }
-            }
-        },
-        (error) => {
-            console.error('位置情報の取得に失敗しました。', error);
-        },
-        { enableHighAccuracy: true }
+    if (distance <= targetRadius) {
+	currentSpotIndex++;
+	alerted = false;
+	if (currentSpotIndex >= targetSpots.length) {
+	    stopTour();
+	}
+	}
+	},
+	(error) => {
+	    console.error('位置情報の取得に失敗しました。', error);
+	},
+	{ enableHighAccuracy: true }
     );
 }
 
@@ -332,8 +351,8 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     const dLat = degToRad(lat2 - lat1);
     const dLon = degToRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    Math.cos(degToRad(lat1)) * Math.cos(degToRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c;
 
@@ -346,7 +365,6 @@ function degToRad(deg) {
 
 
 </script>
-<p><a rel="nofollow" href="/panpan/index.html"><strong>トップ</strong></a>　|　<a rel="nofollow" href="/panpan/map.html"><strong>判定</strong></a>　|　<a rel="nofollow" href="/panpan/record.html"><strong>記録</strong></a>　|　<a rel="nofollow" href="/panpan/geo.html"><strong>試験</strong></a>　|　<a rel="nofollow" href="/panpan/kappa.html"><strong>かっぱ</strong></a></p>
 
 </body>
 </html>
