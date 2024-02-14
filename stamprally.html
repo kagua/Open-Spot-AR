@@ -6,47 +6,82 @@
 <title>スタンプラリー</title>
 <style>
     /* リストのスタイル */
-    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap');
     body {
-        font-family: 'Open Sans', sans-serif;
+        font-family: 'Kosugi Maru', sans-serif;
+        padding-top: 50px; /* ヘッダーの高さと同じ値を指定 */
+        background-color: #FFEEAA; /* 背景色を黄色に設定 */
     }
     #spotsList {
-        padding: 20px;
+        padding-left: 40px;
     }
     #spotsList li {
         list-style-type: decimal;
         color: black;
+        line-height:1.5;
     }
+    #tourButton,#completeButton{
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        color: #fff;
+        background-color: #ffa500;
+        border: 2px solid #ffa500;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        font-size:18pt;
+        background-color: #f8f8f8; /* 固定ヘッダーの背景色 */
+        padding: 15px 0;
+        text-align:center;
+        margin:0;
+        background-color: #d2b48c; /* ベージュの背景色 */
+        z-index: 1000; /* 他の要素よりも前面に表示するための z-index */
+    }
+
 </style>
 </head>
 <body>
-    <h2>スタンプラリー</h2>
+    <h1>スタンプラリー</h1>
     <!-- ツアー開始/中断ボタン -->
+    <p>全スポットをまわろう！全て周るとご褒美メッセージが聴けるﾓﾋﾟよ。ブラウザは閉じないでね。</p>
     <button id="tourButton" onclick="toggleTour()">声ツアーを開始する</button>
     <!-- スポットリスト -->
     <ol id="spotsList"></ol>
     <!-- 現在位置情報表示 -->
-    <p id="currentLocation"></p>
+    <p id="currentLocation">歩きスマホはしないでね。</p>
     <!-- 完了メッセージ -->
     <p id="completionMessage" style="display: none;">全てのスポットを回りました！</p>
     <!-- 完了ボタン -->
-    <button id="completeButton" style="display: none;" onclick="showGoal()">完了メッセージを聴く</button>
+    <button id="completeButton" style="display: none;" onclick="showGoal()">終了メッセージを聴く</button>
     <!-- ゴール画像 -->
-    <img id="goalImage" style="display: none;" src="goal.jpg" alt="ゴール画像">
+    <p><img id="goalImage" style="display: none;" src="goal.jpg" alt="ゴール画像"></p>
 
     <script>
-        // スポット情報
+        // ★ スポット情報（緯度経度と名称）
         var spots = [
-            { coords: { latitude: 35.83849919524573, longitude: 139.58592441971976 }, name: "やまや", audioPlayed: false },
-            { coords: { latitude: 35.83865155821823, longitude: 139.58584334419047 }, name: "電柱", audioPlayed: false }
+            { coords: { latitude: 35.83849919524573, longitude: 139.58592441971976 }, name: "お店", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.838826326760184, longitude: 139.5857641123797 }, name: "公園", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.83865155821823, longitude: 139.58584334419047 }, name: "神社", audioPlayed: false, spotVisited: false }
         ];
 
-        // オーディオ要素の初期化
+        // オーディオ要素の初期化 ★ スポット数に合わせたMP3を用意
+　　　　//（例：スポット数が3箇所なら、0.mp3、1.mp3、2.mp3、と goal.mp3、bgm.mp3）
         var audio = new Audio();
         var bgm = new Audio("bgm.mp3");
+        bgm.loop = true; // BGMをループ再生
         var goalAudio = new Audio("goal.mp3");
 
-        // メッセージと画像の初期化
+        // メッセージと画像の初期化　★ goal.jpgを用意
         var completeMessage = "声ツアーが完了しました。";
         var goalImageSrc = "goal.jpg";
 
@@ -55,12 +90,25 @@
         var watchID = null;
         var lastPlayedSpotIndex = null;
         var completedSpots = [];
+        var spotVisited = [];
+        var targetRadius = 5; // ★ スポット中心からの半径
 
         // スポット番号.mp3 をプリロード
         spots.forEach(function(spot, index) {
             var spotAudio = new Audio(index + ".mp3");
             spotAudio.load();
         });
+
+        // スポット一覧表示
+            var spotsList = document.getElementById("spotsList");
+            spotsList.innerHTML = ""; // リストをクリア
+
+            spots.forEach(function(spot, index) {
+                var spotElement = document.createElement("li");
+                spotElement.id = "spot_" + index;
+                spotElement.innerText = spot.name;
+                spotsList.appendChild(spotElement);
+            });
 
         // ツアーの開始/中断を切り替える関数
         function toggleTour() {
@@ -97,7 +145,7 @@
             spots.forEach(function(spot, index) {
                 var spotElement = document.createElement("li");
                 spotElement.id = "spot_" + index;
-                spotElement.innerText = spot.name;
+                spotElement.innerText = spotVisited ? "* " + spot.name : spot.name;
                 spotsList.appendChild(spotElement);
             });
         }
@@ -116,14 +164,14 @@
             spots.forEach(function(spot, index) {
                 var distance = calculateDistance(currentCoords, spot.coords);
                 var spotElement = document.getElementById("spot_" + index);
-                var spotName = spot.name;
+                var spotName = spot.spotVisited ? "* " + spot.name : spot.name;
 
                 // スポットに近づいたら再生
-                if (distance <= 5 && !spot.audioPlayed) {
+                if (distance <= targetRadius && !spot.audioPlayed) {
                     var spotAudio = new Audio(index + ".mp3");
                     spotAudio.play();
                     spot.audioPlayed = true;
-                    spotName = "*" + spotName; // スポット名の前に * を追加
+                    spot.spotVisited = true; // スポットを訪れたとマーク
                     completedSpots.push(index); // スポットを完了として追加
                 }
 
@@ -165,7 +213,13 @@
         function showGoal() {
             document.getElementById("goalImage").style.display = "block";
             goalAudio.play();
+            bgm.loop = false; // BGMをループ停止
         }
     </script>
+
+<p>　</p>
+<p>　</p>
+<hr>
+<p>otowa.kyouzai.com</p>
 </body>
 </html>
