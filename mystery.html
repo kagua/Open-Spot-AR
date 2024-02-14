@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>東京シャーロック</title>
+<style>
+    /* リストのスタイル */
+    @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap');
+    body {
+        font-family: 'Kosugi Maru', sans-serif;
+        color:#fff;
+        padding-top: 50px; /* ヘッダーの高さと同じ値を指定 */
+        background-color: #333; /* 背景色を黄色に設定 */
+    }
+    #spotsList {
+        padding-left: 40px;
+    }
+    #spotsList li {
+        list-style-type: decimal;
+        color: black;
+        line-height:1.5;
+        color:#fff;
+    }
+    #tourButton,#completeButton{
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        color: #fff;
+        background-color: #778899;
+        border: 2px solid #778899;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        font-size:18pt;
+        background-color: #445566; /* 固定ヘッダーの背景色 */
+        padding: 15px 0;
+        text-align:center;
+        margin:0;
+        z-index: 1000; /* 他の要素よりも前面に表示するための z-index */
+    }
+
+</style>
+</head>
+<body>
+    <h1>東京シャーロック</h1>
+    <p><img id="startImage" src="./mys/start.png" alt="サムネイル"></p>
+    <p>JR横浜駅西口で証拠を探そう✔ 順路が鍵だ。ブラウザは決して閉じるんじゃないぞ、ワトソン。</p>
+    <!-- ツアー開始/中断ボタン -->
+    <button id="tourButton" onclick="toggleTour()">謎解きをはじめる</button>
+    <!-- スポットリスト -->
+    <ol id="spotsList"></ol>
+    <!-- 現在位置情報表示 -->
+    <p id="currentLocation">歩きスマホはするなよ。</p>
+    <!-- 完了メッセージ -->
+    <p id="completionMessage" style="display: none;">これで証拠は全て集まった！</p>
+    <!-- 完了ボタン -->
+    <button id="completeButton" style="display: none;" onclick="showGoal()">事件解決のメッセージを聴く</button>
+    <!-- ゴール画像 -->
+    <p><img id="goalImage" style="display: none;" src="./mys/goal.jpg" alt="ゴール画像"></p>
+
+    <script>
+        // ★ スポット情報（緯度経度と名称）
+        var spots = [
+            { coords: { latitude: 35.466137356567835, longitude: 139.62146588130838 }, name: "横浜駅西口交番", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.46616466556583, longitude: 139.62102477543334 }, name: "高島屋前", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.46706357149912, longitude: 139.62188647992434 }, name: "三菱UFJ信託銀行", audioPlayed: false, spotVisited: false }
+        ];
+
+        // オーディオ要素の初期化 ★ スポット数に合わせたMP3を用意
+　　　　//（例：スポット数が3箇所なら、0.mp3、1.mp3、2.mp3、と goal.mp3、bgm.mp3）
+        var audio = new Audio();
+        var bgm = new Audio("./mys/bgm.mp3");
+        bgm.loop = true; // BGMをループ再生
+        var startAudio = new Audio("./mys/start.mp3");
+        startAudio.load();
+        var goalAudio = new Audio("./mys/goal.mp3");
+        goalAudio.load();
+        // メッセージと画像の初期化　★ goal.jpgを用意
+        var completeMessage = "謎を解いた。";
+        var goalImageSrc = "./mys/goal.jpg";
+
+        // ツアーの状態を管理する変数
+        var tourStarted = false;
+        var watchID = null;
+        var lastPlayedSpotIndex = null;
+        var completedSpots = [];
+        var spotVisited = [];
+        var targetRadius = 9; // ★ スポット中心からの半径
+
+        // スポット番号.mp3 をプリロード
+        spots.forEach(function(spot, index) {
+            var spotAudio = new Audio("/mys/" + index + ".mp3");
+            spotAudio.load();
+        });
+
+        // スポット一覧表示
+            var spotsList = document.getElementById("spotsList");
+            spotsList.innerHTML = ""; // リストをクリア
+
+            spots.forEach(function(spot, index) {
+                var spotElement = document.createElement("li");
+                spotElement.id = "spot_" + index;
+                spotElement.innerText = spot.name;
+                spotsList.appendChild(spotElement);
+            });
+
+        // ツアーの開始/中断を切り替える関数
+        function toggleTour() {
+            if (!tourStarted) {
+                startTour();
+                tourStarted = true;
+                document.getElementById("tourButton").innerText = "中断する";
+            } else {
+                stopTour();
+                tourStarted = false;
+                document.getElementById("tourButton").innerText = "謎解きをはじめる";
+            }
+        }
+
+        // ツアーを開始する関数
+        function startTour() {
+            bgm.play();
+            startAudio.play(); // start.mp3を再生
+            displaySpots(); // スポットリストを表示
+            watchID = navigator.geolocation.watchPosition(updateCurrentLocation, handleError, { enableHighAccuracy: true });
+        }
+
+        // ツアーを中断する関数
+        function stopTour() {
+            bgm.pause();
+            navigator.geolocation.clearWatch(watchID);
+            audio.pause();
+        }
+
+// スポット情報をリスト表示
+function displaySpots() {
+    var spotsList = document.getElementById("spotsList");
+    spotsList.innerHTML = ""; // リストをクリア
+
+    spots.forEach(function(spot, index) {
+        var spotElement = document.createElement("li");
+        spotElement.id = "spot_" + index;
+        spotElement.innerText = spot.name;
+        spotsList.appendChild(spotElement);
+    });
+}
+// DOMのロードが完了したら実行
+document.addEventListener("DOMContentLoaded", function() {
+    displaySpots(); // 目標地点の一覧を表示
+});
+
+// 現在位置情報を更新する関数
+function updateCurrentLocation(position) {
+    var currentCoords = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+    };
+
+    // 現在位置情報を表示
+    document.getElementById("currentLocation").innerText = "現在の緯度経度: " + currentCoords.latitude.toFixed(6) + ", " + currentCoords.longitude.toFixed(6);
+
+    // 目標地点を小さい順にチェック
+    spots.forEach(function(spot, index) {
+        var distance = calculateDistance(currentCoords, spot.coords);
+        var spotElement = document.getElementById("spot_" + index);
+        var spotName = spot.spotVisited ? "✔ " + spot.name : spot.name;
+
+        // 小さい順にスポットを回っている場合のみ再生
+        if (completedSpots.length === index && distance <= targetRadius && !spot.audioPlayed) {
+            // 対応する音声を再生
+            var spotAudio = new Audio("./mys/" + completedSpots.length + ".mp3");
+            spotAudio.play();
+            spot.audioPlayed = true;
+            spot.spotVisited = true; // スポットを訪れたとマーク
+            completedSpots.push(index); // スポットを完了として追加
+        }
+
+        // スポット名と残り距離を表示
+        spotElement.innerText = spotName + " (残り: " + distance.toFixed(2) + "m)";
+    });
+
+    // すべてのスポットが再生されたらコンプリートメッセージを表示
+    if (completedSpots.length === spots.length) {
+        document.getElementById("completionMessage").style.display = "block";
+        document.getElementById("completeButton").style.display = "block";
+    }
+}
+
+// 現在のスポットのインデックスを取得する関数
+function getCurrentSpotIndex(currentCoords) {
+    for (var i = 0; i < spots.length; i++) {
+        var distance = calculateDistance(currentCoords, spots[i].coords);
+        if (distance <= targetRadius) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+        // 2点間の距離を計算する関数
+        function calculateDistance(coords1, coords2) {
+            var R = 6371e3; // 地球の半径 (m)
+            var lat1 = coords1.latitude * Math.PI / 180; // 緯度1 (ラジアン)
+            var lat2 = coords2.latitude * Math.PI / 180; // 緯度2 (ラジアン)
+            var dLat = (coords2.latitude - coords1.latitude) * Math.PI / 180; // 緯度の差 (ラジアン)
+            var dLon = (coords2.longitude - coords1.longitude) * Math.PI / 180; // 経度の差 (ラジアン)
+
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1) * Math.cos(lat2) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            var distance = R * c; // 2点間の距離 (m)
+            return distance;
+        }
+
+        // エラーハンドリング
+        function handleError(error) {
+            console.log('位置情報の取得中にエラーが発生しました:', error.message);
+        }
+
+        // 完了メッセージを表示する関数
+        function showGoal() {
+            document.getElementById("goalImage").style.display = "block";
+            goalAudio.play();
+            bgm.loop = false; // BGMをループ停止
+        }
+    </script>
+
+<p>　</p>
+<p>　</p>
+<hr>
+2024 (C) 音ワールド
+</body>
+</html>
