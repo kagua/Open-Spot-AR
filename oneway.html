@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>位置情報に基づくMP3プレイヤー</title>
+    <style>
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #F5F5F5; /* 淡い灰色 */
+    margin: 0;
+    padding: 0px;
+    font-size: 15px;
+    color: #333; /* 濃いグレー色 */
+}
+
+h1 {
+    background-color: #DED; /* BODYと同じ背景色 */
+    color: #666; /* ピンク色 */
+    text-align: center;
+    margin: 0; /* 上下のマージンを削除 */
+    padding: 20px; /* 左右のパディングを追加 */
+}
+p {
+    margin: 0; /* 上下のマージンを削除 */
+    padding: 5px 20px; /* 左右のパディングを追加 */
+    text-align: center; /* ボタンを中央揃え */
+}
+button {
+    display: inline-block; /* インラインブロック要素に変更 */
+    width: 45%; /* ボタンの幅を調整 */
+    padding: 15px;
+    margin: 0px 2%; /* 余白を調整して中央揃えを維持 */
+    font-size: 18px; /* 読みやすい大きさ */
+    background-color: #4CAF50; /* グリーン色 */
+    color: white; /* 白色テキスト */
+    border: none;
+    border-radius: 25px; /* 丸みを帯びたボーダー */
+    cursor: pointer;
+    transition: background-color 0.3s; /* クリック効果 */
+}
+button.full-width {
+    width: 94%; /* 2列分の幅に調整 */
+    margin: 10px 3%; /* 余白を調整 */
+}
+button:hover {
+    background-color: #45a049; /* ホバー時のグリーン色 */
+}
+button.stop {
+    background-color: #F44336; /* 赤色 */
+}
+button.stop:hover {
+    background-color: #D32F2F; /* ホバー時の赤色 */
+}
+#status {
+    background-color: #FFFFFF; /* 白色 */
+    color: #333; /* 濃いグレー色 */
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 10px; /* 角の丸み */
+    text-align: center;
+}
+</style>
+</head>
+<body>
+    <h1>ちょこ散歩（往路）</h1>
+    <p>復路はページを再読み込みしてね。該当箇所に着いたらボタンタップで声が聴けるよ。</p>
+    <p>
+        <button id="toggleButton" class="full-width" onclick="toggleTracking()">片道散歩を開始する</button>
+    </p>
+    <p>
+        <button onclick="playSound('park.mp3')">公園</button>
+        <button onclick="playSound('post.mp3')">ポスト</button>
+    </p>
+    <p>
+        <button onclick="playSound('conv.mp3')">コンビニ</button>
+        <button onclick="playSound('police.mp3')">交番</button>
+    </p>
+    <p>
+        <button onclick="playSound('station.mp3')">駅</button>
+        <button onclick="playSound('supermarket.mp3')">スーパー</button>
+    </p>
+    <div id="status">現在地を取得してるので、立ち止まってて...</div>
+<p>　</p>
+<p>　</p>
+<hr>
+<p>2024(C)音ワールド<br/>BGM by OtoLogic(CC BY 4.0)</p>
+
+    <script>
+        var audioFiles = ['1.mp3', '2.mp3', '3.mp3', '4.mp3'];
+        var distanceThresholds = [10, 30, 50, 70];
+        var startLat, startLng;
+        var tracking = false;
+        var lastDistanceIndex = -1;
+        var bgmAudio = new Audio('bgm.mp3');
+        var startAudio = new Audio('start.mp3');
+        var latitudes = [];
+        var longitudes = [];
+        var positionCount = 0;
+        var maxPositions = 10;
+        var currentAudio = null; // 現在再生中の音声を追跡する変数
+
+        function toggleTracking() {
+            tracking = !tracking;
+            var button = document.getElementById('toggleButton');
+            if (tracking) {
+                button.innerHTML = '中断する';
+                button.classList.add('stop'); // ボタンに 'stop' クラスを追加
+                bgmAudio.play(); // Start playing BGM
+                startAudio.play(); // Play start sound immediately
+                startLat = null; // Reset start positions
+                startLng = null;
+                latitudes = []; // Reset collected positions
+                longitudes = [];
+                positionCount = 0; // Reset the count
+                collectInitialPositions(); // Start collecting initial positions
+            } else {
+                button.innerHTML = 'このツアーを開始する';
+                button.classList.remove('stop'); // 'stop' クラスを削除
+                document.getElementById('status').innerHTML = 'トラッキングを停止しました。';
+                if (watchId) navigator.geolocation.clearWatch(watchId);
+                bgmAudio.pause();
+                bgmAudio.currentTime = 0;
+                startAudio.pause(); // Optional: Stop start sound if playing
+                startAudio.currentTime = 0;
+            }
+        }
+
+        function collectInitialPositions() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    latitudes.push(position.coords.latitude);
+                    longitudes.push(position.coords.longitude);
+                    positionCount++;
+                    document.getElementById('status').innerHTML = `まだ動かないで。スタート地点を取得しているよ・・・ ${positionCount} /10回`;
+                    if (positionCount < maxPositions) {
+                        collectInitialPositions(); // Continue collecting
+                    } else {
+                        // Calculate median position
+                        latitudes.sort((a, b) => a - b);
+                        longitudes.sort((a, b) => a - b);
+                        startLat = latitudes[Math.floor(maxPositions / 2)];
+                        startLng = longitudes[Math.floor(maxPositions / 2)];
+                        document.getElementById('status').innerHTML = `中央値の位置: ${startLat}, ${startLng}`;
+                        watchPosition(); // Start watching position after initial positions are collected
+                    }
+                }, showError, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+            } else {
+                document.getElementById('status').innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        var watchId;
+        function watchPosition() {
+            if (tracking) {
+                watchId = navigator.geolocation.watchPosition(position => {
+                    var currentLat = position.coords.latitude;
+                    var currentLng = position.coords.longitude;
+                    var dist = calculateDistance(startLat, startLng, currentLat, currentLng);
+                    document.getElementById('status').innerHTML = `現在地: ${currentLat}, ${currentLng} (スタート地点から${dist}m)`;
+                    checkThreshold(dist);
+                }, showError, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
+            }
+        }
+
+        function showError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    document.getElementById('status').innerHTML = "位置情報の取得がユーザーによって拒否されました。";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    document.getElementById('status').innerHTML = "位置情報が利用不可です。";
+                    break;
+                case error.TIMEOUT:
+                    document.getElementById('status').innerHTML = "位置情報の取得にタイムアウトしました。";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    document.getElementById('status').innerHTML = "未知のエラーが発生しました。";
+                    break;
+            }
+        }
+
+function playSound(file) {
+    // 既に音声が再生中であれば停止
+    if (currentAudio) {
+        currentAudio.pause(); // 再生を停止
+        currentAudio.currentTime = 0; // 再生位置を最初に戻す
+    }
+
+    // 新しい音声ファイルをロードして再生
+    currentAudio = new Audio(file);
+    currentAudio.play();
+}
+
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            var R = 6371e3; // 地球の半径 (メートル)
+            var φ1 = lat1 * Math.PI / 180;
+            var φ2 = lat2 * Math.PI / 180;
+            var Δφ = (lat2 - lat1) * Math.PI / 180;
+            var Δλ = (lng2 - lng1) * Math.PI / 180;
+            var a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return Math.floor(R * c); // Return distance in meters
+        }
+
+        function checkThreshold(distance) {
+            for (var i = 0; i < distanceThresholds.length; i++) {
+                if (distance >= distanceThresholds[i] && lastDistanceIndex < i) {
+                    playSound(audioFiles[i]);
+                    lastDistanceIndex = i;
+                    break; // Play only one sound per distance threshold
+                }
+            }
+        }
+    </script>
+</body>
+</html>
