@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スポット内で再生</title>
+<link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Kiwi Maru', serif;
+        color: #333; /* 落ち着いた文字色 */
+        background-color: #f8f0f5; /* 落ち着いたピンク色の背景 */
+        margin: 0; /* 余白をなくす */
+        padding: 0 20px 0 20px; /* 本文にパディングを追加 */
+        line-height: 1.6;
+    }
+
+    h1 {
+        font-size: 22px; /* より読みやすいフォントサイズ */
+        background-color: #ffb6c1; /* 落ち着いたピンク色 */
+        color: #333; /* 文字色 */
+        padding: 5px 0; /* 上下のパディングを増やして、より柔らかい感じに */
+        margin: 0; /* 余白をなくす */
+        margin-top: 10px; /* 余白をなくす */
+        border-radius: 15px; /* 角をより丸くして柔らかい印象に */
+        text-align: center; /* 中央揃え */
+        box-shadow: 0 4px 6px rgba(255, 182, 193, 0.5); /* ソフトなシャドウを追加 */
+    }
+
+    label, select, button, #spotInfo, #location, #distance {
+        font-size: 16px; /* より読みやすいフォントサイズ */
+        display: block;
+        box-sizing: border-box;
+    }
+    label, select, button {
+        margin-bottom: 5px;
+        padding: 10px 20px; /* 要素にパディングを追加 */
+    }
+
+    #spotInfo, #location, #distance {
+        margin-bottom: 5px;
+        padding: 0px 20px; /* 要素にパディングを追加 */
+    }
+    #audiop {
+        margin: 0px;
+        padding: 7px 20px 15px 20px; /* 要素にパディングを追加 */
+    }
+
+    select, button {
+        height: 52px; /* ボタンの高さを増やす */
+        border: 2px solid #ffadc9; /* 落ち着いたピンクのボーダー */
+        border-radius: 15px; /* ボーダーの角を丸くして柔らかい印象に */
+        background-color: #fff;
+        transition: all 0.3s ease-in-out;
+    }
+
+    select:focus, button:focus {
+        border-color: #ff8097; /* フォーカス時のボーダー色を暗めに */
+        outline: none;
+    }
+
+    button {
+        background-color: #ffadc9; /* ボタンの背景色を落ち着いたピンクに */
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 12px 48px; /* ボタン内のパディングを増やして大きく見せる */
+    }
+
+    button:hover {
+        background-color: #ff8097; /* ホバー時の背景色を濃いピンクに */
+    }
+
+    button:disabled {
+        background-color: #cccccc; /* グレイアウトされたボタンの色 */
+        border-color: #cccccc;
+        cursor: not-allowed;
+    }
+
+    #music, #spotImage {
+        display: block;
+        width: 100%; /* フル幅で表示 */
+        margin-top: 20px; /* 上の余白を追加 */
+        padding: 0; /* パディングなし */
+    }
+
+    #spotImage {
+        border-radius: 10px; /* 画像の角を丸く */
+    }
+
+    @media (min-width: 768px) {
+        body {
+            font-size: 18px; /* 大画面ではフォントサイズを大きく */
+        }
+        label, select, button, #spotInfo, #location, #distance {
+            font-size: 18px; /* 大画面では要素のフォントサイズを大きく */
+        }
+    }
+</style>
+
+</head>
+<body>
+<h1>スポット内で再生</h1>
+    <label for="prefecture">聴きたい都道府県と地域を選んでね。</label>
+    <select id="prefecture" onchange="updateAreas()">
+        <option value="">選択してください</option>
+        <option value="埼玉">埼玉</option>
+        <option value="東京">東京</option>
+        <option value="神奈川">神奈川</option>
+    </select>
+<!-- ◆    <label for="area">地域:</label> -->
+    <select id="area" onchange="displaySpotInfo()">
+        <!-- JavaScriptで更新される -->
+    </select>
+
+    <div id="spotInfo" style="margin-top: 20px;">目標地：＊＊＊</div>
+    <div id="location">現在地: ＊＊＊</div>
+    <div id="distance">残り: ＊＊＊</div>
+<button id="toggle" disabled>スタートする</button>
+<p id="audiop"><audio id="music" src=""></audio></p>
+<p id="message"></p>
+<img id="spotImage" src="" style="max-width: 100%; display: none;">
+
+<script>
+// スポットの範囲を定義する変数（メートル単位）
+const SPOT_RANGE = 5; // この値を変更することで、範囲の大きさを調整できます
+
+const spots = {
+    '埼玉': {
+        '志木': {
+            'name': '志木駅かっぱ像',
+            'latitude': 35.83872071052985,
+            'longitude': 139.58603089644546,
+            'filename': 'coupon', // MP3、JPG 共通のファイル名
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '浦和': {
+            'name': '浦和レッズスタジアム',
+            'latitude': 35.903411,
+            'longitude': 139.717194,
+            'filename': 'urawa_reds_stadium', // 共通のファイル名
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '大宮': {
+            'name': '大宮公園',
+            'latitude': 35.925073,
+            'longitude': 139.634045,
+            'filename': 'omiya_park',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '川越': {
+            'name': '川越氷川神社',
+            'latitude': 35.925607,
+            'longitude': 139.485031,
+            'filename': 'kawagoe_hikawa_shrine',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        }
+    },
+    '東京': {
+        '渋谷': {
+            'name': '渋谷スクランブル交差点',
+            'latitude': 35.6595,
+            'longitude': 139.6995,
+            'filename': 'shibuya_scramble',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '池袋': {
+            'name': 'サンシャイン60',
+            'latitude': 35.7302,
+            'longitude': 139.7186,
+            'filename': 'sunshine60',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '新宿': {
+            'name': '新宿御苑',
+            'latitude': 35.6884,
+            'longitude': 139.7100,
+            'filename': 'shinjuku_gyoen',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '品川': {
+            'name': '品川水族館',
+            'latitude': 35.5884,
+            'longitude': 139.7394,
+            'filename': 'shinagawa_aquarium',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '東京': {
+            'name': '東京駅中央口',
+            'latitude': 35.682568,
+            'longitude': 139.765419,
+            'filename': 'tokyo_station',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        }
+    },
+    '神奈川': {
+        '横浜': {
+            'name': 'みなとみらい',
+            'latitude': 35.4546,
+            'longitude': 139.6316,
+            'filename': 'minato_mirai',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '川崎': {
+            'name': '川崎大師',
+            'latitude': 35.5333,
+            'longitude': 139.7330,
+            'filename': 'kawasaki_daishi',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        },
+        '鎌倉': {
+            'name': '鎌倉大仏',
+            'latitude': 35.3168,
+            'longitude': 139.5350,
+            'filename': 'kamakura_daibutsu',
+            'message': '＞＞この声ツアーの感想を送る！', // メッセージを追加
+            'Url': 'https://otowa.kyouzai.com/form' // Spotifyリンクを追加
+        }
+    }
+};
+
+
+function updateAreas() {
+    const prefectureSelect = document.getElementById('prefecture');
+    const areaSelect = document.getElementById('area');
+    const selectedPrefecture = prefectureSelect.value;
+
+    areaSelect.innerHTML = '<option value="">選択してください</option>'; // 初期化
+
+    if (spots[selectedPrefecture]) {
+        Object.keys(spots[selectedPrefecture]).forEach(area => {
+            const option = document.createElement('option');
+            option.textContent = area;
+            option.value = area;
+            areaSelect.appendChild(option);
+        });
+    }
+    // 都道府県が変更されたときは、トグルボタンを無効にする
+    document.getElementById('toggle').disabled = true;
+}
+
+let selectedSpot = null;
+
+function displaySpotInfo() {
+    const prefecture = document.getElementById('prefecture').value;
+    const area = document.getElementById('area').value;
+    selectedSpot = spots[prefecture] ? spots[prefecture][area] : null;
+    const infoDiv = document.getElementById('spotInfo');
+    const toggleBtn = document.getElementById('toggle');
+
+    if (selectedSpot) {
+        infoDiv.innerHTML = `
+            <strong>目標地:</strong> ${selectedSpot.name}<br>
+            <strong>緯度:</strong> ${selectedSpot.latitude}<br>
+            <strong>経度:</strong> ${selectedSpot.longitude}
+        `;
+        toggleBtn.disabled = false; // 都道府県と地域が選択されていればトグルボタンを有効にする
+    } else {
+        infoDiv.innerHTML = '選択された地域: ' + (prefecture && area ? `${prefecture} ${area}` : '');
+        toggleBtn.disabled = true; // 有効なスポットが選択されていなければトグルボタンを無効にする
+    }
+}
+
+        function updateSpotInfoDisplay() {
+            const infoDiv = document.getElementById('spotInfo');
+            if (selectedSpot) {
+                    infoDiv.innerHTML = `
+                        <strong>目標地:</strong> ${selectedSpot.name}<br>
+                        <strong>緯度:</strong> ${selectedSpot.latitude}<br>
+                        <strong>経度:</strong> ${selectedSpot.longitude}
+                    `;
+                    // ここで音楽や画像を設定しない
+             } else {
+                    infoDiv.innerHTML = '選択された地域: ' + (prefecture && area ? `${prefecture} ${area}` : '');
+             }
+    document.getElementById('music').removeAttribute('controls'); // コントロールバーを非表示
+    document.getElementById('music').pause(); // 音楽を停止
+    document.getElementById('music').currentTime = 0; // 音楽を最初からに設定
+    document.getElementById('spotImage').style.display = 'none'; // 画像を非表示
+        }
+
+let watchID = null;
+function toggleTracking() {
+    if (watchID !== null) {
+        navigator.geolocation.clearWatch(watchID); // 位置情報の更新を停止
+        watchID = null;
+        document.getElementById('toggle').textContent = 'スタートする'; // ボタンのテキストを「スタートする」に変更
+        document.getElementById('music').pause(); // 音楽を停止
+        document.getElementById('music').currentTime = 0; // 音楽を最初からに設定
+        document.getElementById('music').removeAttribute('controls'); // 音楽のコントロールバーを非表示
+        document.getElementById('spotImage').style.display = 'none'; // 画像を非表示
+        // 位置情報の表示をリセット
+        document.getElementById('location').innerHTML = '現在地: ＊＊＊';
+        document.getElementById('distance').innerHTML = '残り: ＊＊＊';
+    } else {
+        watchID = navigator.geolocation.watchPosition(updateLocation, handleError, {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 5000
+        });
+        document.getElementById('toggle').textContent = '中断する'; // ボタンのテキストを「中断する」に変更
+    }
+}
+
+        function updateLocation(position) {
+            const { latitude, longitude } = position.coords;
+            document.getElementById('location').innerHTML = `現在地: 緯度 ${latitude.toFixed(6)}, 経度 ${longitude.toFixed(6)}`;
+            if (selectedSpot) {
+                const distance = calculateDistance(latitude, longitude, selectedSpot.latitude, selectedSpot.longitude);
+                document.getElementById('distance').innerHTML = `残り: ${distance.toFixed(2)} m`;
+                if (distance < SPOT_RANGE) { // 変数を使用
+                            const musicPlayer = document.getElementById('music');
+                            musicPlayer.src = selectedSpot.filename + '.mp3';
+                            musicPlayer.setAttribute('controls', ''); // コントロールバーを表示
+                            document.getElementById('spotImage').src = selectedSpot.filename + '.jpg'; // 画像を表示
+               document.getElementById('message').innerHTML = `<a href="${selectedSpot.Url}" target="_blank">${selectedSpot.message}</a>`;
+                            document.getElementById('spotImage').style.display = 'block'; // 画像を表示状態に
+            if (watchID !== null) {
+                navigator.geolocation.clearWatch(watchID); // 位置情報の更新を停止
+                watchID = null;
+                document.getElementById('toggle').textContent = 'スポットに着いた！'; // ボタンのテキストを更新
+            }
+                                    } else {
+                            document.getElementById('music').removeAttribute('controls'); // コントロールバーを非表示
+            document.getElementById('spotImage').style.display = 'none'; // 画像を非表示状態に
+            document.getElementById('message').innerHTML = ''; // メッセージをクリア
+
+                        }
+            }
+        }
+
+        function handleError(error) {
+            locationDiv.innerHTML = '現在地: ＊＊＊'; // エラーがある場合のテキスト
+            distanceDiv.innerHTML = '距離差: ＊＊＊'; // エラーがある場合のテキスト
+        }
+        
+        document.getElementById('toggle').addEventListener('click', toggleTracking);
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // 地球の半径、メートル単位
+    const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // メートル単位の距離
+}
+
+</script>
+</body>
+</html>
