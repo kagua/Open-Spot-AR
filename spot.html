@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>スポット内で再生</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kiwi Maru', serif;
+            margin: 0;
+            padding: 20px; /* 上に少し余白を追加 */
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+            margin: 0 0 20px 0; /* 上詰めにするため下のマージンのみを指定 */
+            text-align:center;
+            font-size:18pt;
+        }
+
+        p {
+            color: #666;
+            margin: 0 0 20px 0; /* 上詰めにするため下のマージンのみを指定 */
+        }
+       #goalImage {
+           max-width: 320px; /* 画像の最大幅を320pxに設定 */
+           display: none; /* 初期状態では非表示にする */
+       }
+        #location, #distance {
+            background-color: #fff;
+            color: #333;
+            padding: 10px 20px;
+            margin-bottom: 20px; /* 各要素の間に余白を追加 */
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            width: calc(100% - 40px); /* パディングを考慮した幅の設定 */
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 40px; /* パディングを増やしてボタンを大きくする */
+            font-size: 18px; /* フォントサイズを大きくする */
+            border: none;
+            border-radius: 10px; /* ボーダーラジアスを増やしてより丸みを帯びさせる */
+            cursor: pointer;
+            width: calc(100% - 40px);
+            max-width: 300px; /* 最大幅を設定 */
+            margin-top: 10px; /* 上の余白を追加 */
+        }
+
+        button:active {
+            background-color: #45a049;
+        }
+    audio {
+        width: 100%; /* スクリーン幅に合わせてオーディオコントロールを拡張 */
+        margin: 40px auto; /* 中央揃え */
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>スポット内で再生</h1>
+    <p>スポットに行ってお気に入りのミュージックを聴いてみよう。</p>
+    <div id="location">現在地: ＊＊＊</div>
+    <div id="distance">残り: ＊＊＊</div>
+    <button id="toggle">スタートする</button>
+<audio id="music" src="music.mp3" type="audio/mp3"></audio>
+    <img id="goalImage" src="" style="max-width: 100%; display: none;">
+
+    <script>
+        let watchID = null;
+        const locationDiv = document.getElementById('location');
+        const distanceDiv = document.getElementById('distance');
+        const music = document.getElementById('music');
+        const goalImage = document.getElementById('goalImage');
+        const toggleBtn = document.getElementById('toggle');
+
+        // 指定された緯度経度
+        const fixedLat = 35.83869026917891;
+        const fixedLng = 139.58594238354422;
+        // 距離の閾値を変数で設定
+        const distanceThreshold = 15; // 5メートル未満になった場合の閾値
+        // メディアファイルのパスを変数で定義
+        const musicFile = 'music.mp3'; // 音楽ファイルのパス
+        const goalImageFile = 'coupon.jpg'; // 画像ファイルのパス
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // 地球の半径、メートル単位
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // メートル単位の距離
+        }
+        
+        function updateLocation(position) {
+            const { latitude, longitude } = position.coords;
+            locationDiv.innerHTML = `現在地: 緯度 ${latitude.toFixed(6)}, 経度 ${longitude.toFixed(6)}`;
+            const distance = calculateDistance(latitude, longitude, fixedLat, fixedLng);
+            distanceDiv.innerHTML = `距離差: ${distance.toFixed(2)} m`;
+
+                if (distance < distanceThreshold) { // 距離が閾値未満になった場合
+                    music.controls = true; // コントロールバーを表示
+                    music.src = musicFile; // 変数を使用して音楽ファイルを設定
+                    // 音楽を自動再生したい時は、music.play();
+                    goalImage.src = goalImageFile; // 変数を使用して画像ファイルを設定
+                    goalImage.style.display = 'block'; // 画像を非表示から表示へ変更
+                    if(watchID !== null) {
+                        navigator.geolocation.clearWatch(watchID); // 位置情報の更新を停止
+                        watchID = null;
+                        toggleBtn.textContent = 'スタートする'; // ボタンのテキストを更新
+                    }
+                } else {
+                    music.controls = false; // コントロールバーを非表示に設定
+                }
+        }
+
+        function handleError(error) {
+            locationDiv.innerHTML = '現在地: ＊＊＊'; // エラーがある場合のテキスト
+            distanceDiv.innerHTML = '距離差: ＊＊＊'; // エラーがある場合のテキスト
+        }
+
+        function toggleTracking() {
+            if (watchID !== null) {
+                navigator.geolocation.clearWatch(watchID);
+                watchID = null;
+                toggleBtn.textContent = 'スタートする';
+                locationDiv.innerHTML = '現在地: ＊＊＊';
+                distanceDiv.innerHTML = '距離差: ＊＊＊';
+            } else {
+                watchID = navigator.geolocation.watchPosition(updateLocation, handleError, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+                toggleBtn.textContent = '中断する';
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleTracking);
+        
+        
+    </script>
+</body>
+</html>
