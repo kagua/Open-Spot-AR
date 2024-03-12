@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>スタンプラリー</title>
@@ -53,7 +61,7 @@
 <body>
     <h1>スタンプラリー</h1>
     <!-- ツアー開始/中断ボタン -->
-    <p>全スポットをまわろう！全て周るとご褒美メッセージが聴けるﾓﾋﾟよ。ブラウザは閉じないでね。</p>
+    <p>全スポットをまわろう✔ 全て周るとご褒美メッセージが聴けるﾓﾋﾟよ。ブラウザは閉じないでね。</p>
     <button id="tourButton" onclick="toggleTour()">声ツアーを開始する</button>
     <!-- スポットリスト -->
     <ol id="spotsList"></ol>
@@ -69,9 +77,11 @@
     <script>
         // ★ スポット情報（緯度経度と名称）
         var spots = [
-            { coords: { latitude: 35.83849919524573, longitude: 139.58592441971976 }, name: "お店", audioPlayed: false, spotVisited: false },
-            { coords: { latitude: 35.838826326760184, longitude: 139.5857641123797 }, name: "公園", audioPlayed: false, spotVisited: false },
-            { coords: { latitude: 35.83865155821823, longitude: 139.58584334419047 }, name: "神社", audioPlayed: false, spotVisited: false }
+            { coords: { latitude: 35.83811637793212, longitude: 139.58617637479145 }, name: "スタート", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.838335914614504, longitude: 139.5867462139805 }, name: "最初のかど", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.83843484941769, longitude: 139.5869058055804 }, name: "トヨタ自動車", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.84012647191605, longitude: 139.58517646464583 }, name: "２個目の歩道橋", audioPlayed: false, spotVisited: false },
+            { coords: { latitude: 35.83997240695551, longitude: 139.5850793605516 }, name: "ゴール", audioPlayed: false, spotVisited: false }
         ];
 
         // オーディオ要素の初期化 ★ スポット数に合わせたMP3を用意
@@ -91,7 +101,7 @@
         var lastPlayedSpotIndex = null;
         var completedSpots = [];
         var spotVisited = [];
-        var targetRadius = 5; // ★ スポット中心からの半径
+        var targetRadius = 10; // ★ スポット中心からの半径
 
         // スポット番号.mp3 をプリロード
         spots.forEach(function(spot, index) {
@@ -145,7 +155,7 @@
             spots.forEach(function(spot, index) {
                 var spotElement = document.createElement("li");
                 spotElement.id = "spot_" + index;
-                spotElement.innerText = spotVisited ? "* " + spot.name : spot.name;
+                spotElement.innerText = spotVisited ? "✔ " + spot.name : spot.name;
                 spotsList.appendChild(spotElement);
             });
         }
@@ -164,7 +174,7 @@
             spots.forEach(function(spot, index) {
                 var distance = calculateDistance(currentCoords, spot.coords);
                 var spotElement = document.getElementById("spot_" + index);
-                var spotName = spot.spotVisited ? "* " + spot.name : spot.name;
+                var spotName = spot.spotVisited ? "✔ " + spot.name : spot.name;
 
                 // スポットに近づいたら再生
                 if (distance <= targetRadius && !spot.audioPlayed) {
@@ -220,6 +230,7 @@
 <p>　</p>
 <p>　</p>
 <hr>
-<p>2024(C) 音ワールド</p>
+<p><a rel="nofollow" href="/panpan/trace.html"><strong>謎解き</strong></a>　|<a rel="nofollow" href="/panpan/index.html"><strong>トップ</strong></a>　|<a rel="nofollow" href="/panpan/map.html"><strong>判定</strong></a>　|<a rel="nofollow" href="/panpan/record.html"><strong>記録</strong></a>　|<a rel="nofollow" href="/panpan/geo.html"><strong>試験</strong></a>　|<a rel="nofollow" href="/panpan/kappa.html"><strong>かっぱ</strong></a>　|<a rel="nofollow" href="/panpan/stamprally.html"><strong>スタンプ</strong></a></p>
+
 </body>
 </html>

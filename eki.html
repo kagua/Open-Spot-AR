@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
+
+    <meta charset="UTF-8">
+    <title>音声ARのWebアプリ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+body {
+    font-family: 'Kiwi Maru', serif;
+    background-color: #f0e6f6; /* 薄い紫 */
+    color: #333;
+    padding: 0px 10px 0px 10px;
+}
+
+button {
+    background-color: #f06292; /* 明るいピンク */
+    color: white;
+    padding: 15px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #e91e63; /* 濃いピンク */
+}
+
+input[type="checkbox"] {
+    display: inline-block; /* チェックボックスを表示する */
+}
+
+input[type="checkbox"]:checked + label {
+    background-color: #ffee58; /* 濃い黄色 */
+}
+
+#selectedStation, #positions, #stations, input[type="checkbox"] + label {
+    background-color: transparent; /* 背景色を透明に */
+    padding: 5px; /* パディングを適用してコンテンツが詰まらないように */
+    margin-bottom: 5px; /* マージンを維持して間隔を保ちます */
+    border-radius: 0; /* 角丸を無しに */
+    font-size: 14px; /* フォントサイズを適用します */
+    display: block; /* チェックボックス+ラベルをブロックとして表示 */
+    cursor: pointer; /* ポインタを指に */
+}
+
+h1 {
+    text-align: center;
+    font-size: 16pt;
+    padding: 10px;
+}
+    </style>
+</head>
+<body>
+    <h1>駅に着けば聴ける音楽</h1>
+    <div align="center"><img src="018.png"></div>
+    <button id="getLocation">近くの駅を探す</button>
+    <div id="positions"></div> <!-- 緯度経度のリストを表示するためのコンテナ -->
+    <div id="stations"></div>
+    <div id="selectedStation"></div>
+    <button id="startNavigation" style="display:none;">駅に向かう</button>
+    <audio id="audio" src="music.mp3" controls style="display:none;"></audio>
+    <script src="app.js"></script>
+</body>
+</html>
