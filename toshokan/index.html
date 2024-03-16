@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
+
+    <meta charset="UTF-8">
+    <title>図書館で聴く 第1回「AI時代の図書館との付き合い方」</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+
+
+<!-- OGPタグ開始 -->
+    <meta property="og:title" content="図書館で聴く 第1回「AI時代の図書館との付き合い方」" /> <!-- ページのタイトル -->
+    <meta property="og:type" content="article" /> <!-- コンテンツの種類 -->
+    <meta property="og:url" content="https://otowa.kyouzai.com/map/toshokan/" /> <!-- ページのURL -->
+    <meta property="og:image" content="https://otowa.kyouzai.com/map/toshokan/top.jpg" /> <!-- サムネイル画像のURL -->
+    <meta property="og:description" content="スマホの位置情報を使って図書館でのみ聴ける限定配信ラジオです。2024年3月16日から1ヶ月間視聴可能です。第1回は「AI時代の図書館との付き合いかた」（16分）です。きっとあなたも本が借りたくなります。" /> <!-- ページの説明 -->
+    <meta property="og:site_name" content="音ワールド" /> <!-- サイトの名前 -->
+    <meta property="og:locale" content="ja_JP" /> <!-- 地域設定 (ここでは「日本語」) -->
+    <!-- Twitterカードの設定（オプション） -->
+    <meta name="twitter:card" content="summary_large_image"> <!-- カードの種類 -->
+    <meta name="twitter:site" content="@creator_enews"> <!-- サイトのTwitterユーザー名 -->
+    <meta name="twitter:title" content="図書館で聴く 第1回「AI時代の図書館との付き合い方」"> <!-- コンテンツのタイトル -->
+    <meta name="twitter:description" content="スマホの位置情報を使って図書館でのみ聴ける限定配信ラジオです。2024年3月16日から1ヶ月間視聴可能です。第1回は「AI時代の図書館との付き合いかた」（16分）です。きっとあなたも本が借りたくなります。"> <!-- コンテンツの説明 -->
+
+
+    <style>
+body {
+    font-family: 'Kiwi Maru', serif;
+    background-color: #f0e6f6; /* 薄い紫 */
+    color: #333;
+    padding: 0px 10px 0px 10px;
+    font-size: 14px; /* フォントサイズを適用します */
+}
+
+button {
+    background-color: #f06292; /* 明るいピンク */
+    color: white;
+    padding: 15px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #e91e63; /* 濃いピンク */
+}
+
+input[type="checkbox"] {
+    display: inline-block; /* チェックボックスを表示する */
+}
+
+input[type="checkbox"]:checked + label {
+    background-color: #ffee58; /* 濃い黄色 */
+}
+
+#selectedStation, #positions, #stations, input[type="checkbox"] + label {
+    background-color: transparent; /* 背景色を透明に */
+    padding: 5px; /* パディングを適用してコンテンツが詰まらないように */
+    margin-bottom: 5px; /* マージンを維持して間隔を保ちます */
+    border-radius: 0; /* 角丸を無しに */
+    font-size: 14px; /* フォントサイズを適用します */
+    display: block; /* チェックボックス+ラベルをブロックとして表示 */
+    cursor: pointer; /* ポインタを指に */
+}
+#credit{
+   font-size: 9px;
+}
+h1 {
+    text-align: center;
+    font-size: 16pt;
+    padding: 10px;
+    margin: 0px;
+}
+#coverart{
+    font-size:120px;
+    margin:-40px 0 0 0;
+    padding:0;
+    text-align:center;
+}
+    </style>
+</head>
+<body>
+    <h1>図書館で聴く</h1>
+    <div id="coverart">📖</div>
+    <button id="getLocation">近くの図書館を探す</button>
+    <div id="positions"></div> <!-- 緯度経度のリストを表示するためのコンテナ -->
+    <div id="stations"></div>
+    <div id="selectedStation"></div>
+    <button id="startNavigation" style="display:none;">図書館へ向かう</button>
+    <audio id="audio" src="voice.mp3" controls style="display:none;"></audio>
+    <script src="./app.js"></script>
+    <div id="message"><strong>【ご利用ありがとうございます】</strong><br/><br/>・再生表示後は図書館でなくとも別な場所でも聴けます。<br/>・Webページを閉じてしまいますと、消えてしまいます。ご注意下さい。<br/>・音声内で書籍を紹介しています。できればその書籍を借りたり、図書館をご利用したりして、図書館にて素敵な時間をお過ごしいただければ嬉しいです。<br/>・個人情報や位置情報は一切 記録/送信していません。<br/>・制作著作/お問い合わせ：吉田喜彦 @creator_enews<br/><strong>※この配信は図書館による支援、または運営されるものではありません。</strong></div>
+<p>　</p>
+<hr>
+<div id="credit">API by <a target="_blank" href="https://calil.jp/doc/api.html">カーリル図書館API</a> 2024 (C)音ワールド<br/>BGM by OtoLogic(CC BY 4.0)</div>
+</body>
+</html>

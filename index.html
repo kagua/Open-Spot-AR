@@ -1,142 +1,86 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ハチ公銅像までの距離</title>
-  <style>
-    body {
-      background-color: yellow; /* 背景色を黄色に設定 */
-      margin: 0; /* 余白をなくす */
-    }
-    .container {
-      display: flex;
-      flex-direction: column; /* 縦方向の並び */
-      justify-content: center; /* 水平方向の中央揃え */
-      align-items: center; /* 垂直方向の中央揃え */
-      height: 80vh; /* コンテナの高さをビューポートの高さに設定 */
-    }
-    #check {
-      font-size: 18pt;
-      background-color: purple; /* ボタンの背景色を紫に設定 */
-      color: white; /* ボタンのテキスト色を白に設定 */
-      border: none; /* 枠線を削除 */
-      padding: 10px 20px; /* パディングを設定 */
-      border-radius: 5px; /* ボタンの角を丸くする */
-    }
-    #check:hover {
-      background-color: #7d00ff; /* ホバー時のボタンの背景色を変更 */
-    }
-    .text {
-      font-size: 24pt;
-      color: black; /* テキストの色を黒に設定 */
-      margin-bottom: 18pt; /* ボタンとの間のマージン */
-    }
-  </style>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PDKVP2');</script>
+<!-- End Google Tag Manager -->
+
+    <meta charset="UTF-8">
+    <title>トショカン～図書館で聴く音声</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+body {
+    font-family: 'Kiwi Maru', serif;
+    background-color: #f0e6f6; /* 薄い紫 */
+    color: #333;
+    padding: 0px 10px 0px 10px;
+}
+
+button {
+    background-color: #f06292; /* 明るいピンク */
+    color: white;
+    padding: 15px 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #e91e63; /* 濃いピンク */
+}
+
+input[type="checkbox"] {
+    display: inline-block; /* チェックボックスを表示する */
+}
+
+input[type="checkbox"]:checked + label {
+    background-color: #ffee58; /* 濃い黄色 */
+}
+
+#selectedStation, #positions, #stations, input[type="checkbox"] + label {
+    background-color: transparent; /* 背景色を透明に */
+    padding: 5px; /* パディングを適用してコンテンツが詰まらないように */
+    margin-bottom: 5px; /* マージンを維持して間隔を保ちます */
+    border-radius: 0; /* 角丸を無しに */
+    font-size: 14px; /* フォントサイズを適用します */
+    display: block; /* チェックボックス+ラベルをブロックとして表示 */
+    cursor: pointer; /* ポインタを指に */
+}
+
+h1 {
+    text-align: center;
+    font-size: 16pt;
+    padding: 10px;
+}
+#coverart{
+    font-size:96pt;
+    text-align:center;
+    padding:0;
+    margin:-50px 0 10px 0;
+}
+    </style>
 </head>
-
 <body>
-  <div class="container">
-    <div class="text">ハチ公までの<br/>距離を測る<br/>（10m以内でOK）</div>
-    <button id="check">場所をチェック！</button>
-    <div class="text"></div>
-    <div class="text"><img src="landmark_hachikou.png" width="200"/></div>
-    <div class="text"><a rel="nofollow" target="_blank" href="record.html"><strong>💾緯度経度の記録をする</strong></a></div>
-   
-  </div>
-
-<!-- オーディオ要素の定義。ここでMP3ファイルを指定します -->
-<audio id="myAudio" preload="auto">
-  <source src="sample-voice.mp3" type="audio/mpeg">
-  お使いのブラウザはaudio要素をサポートしていません。
-</audio>
-
-<script>
-  // ページが完全に読み込まれた後に実行される関数
-  function audioplay() {
-      // オーディオを再生する
-          var audio = document.getElementById('myAudio');
-          audio.play();
-  };
-</script>
-
-
-<script type="text/javascript">
-
-document.addEventListener('DOMContentLoaded', function() {
-  const checkButton = document.getElementById('check');
-
-  // 特定地点の緯度経度（例）
-const targetLatitude = 35.840768048134166;
-const targetLongitude = 139.5874240273591;
-let watchID = null; // 監視IDを保持する変数
-
-  // 2点間の距離を計算する関数（Haversine公式を使用）
-  function calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // 地球の半径（メートル）
-    const rad = Math.PI / 180;
-    const deltaLat = (lat2 - lat1) * rad;
-    const deltaLon = (lon2 - lon1) * rad;
-    const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-              Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
-              Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-
-  // ボタンクリック時の処理
-  checkButton.addEventListener('click', function() {
-
-    // 既存の監視があれば停止
-    if (watchID !== null) {
-      navigator.geolocation.clearWatch(watchID);
-    }
-    let count = 0; // 位置情報取得の回数をカウント
-    let positions = []; // 位置情報を格納する配列
-
-    watchID = navigator.geolocation.watchPosition(function(position) {
-
-      positions.push(position);
-
-      // 5回の位置情報を取得したら
-      if (positions.length === 5) {
-
-        navigator.geolocation.clearWatch(watchID);
-
-        // 平均緯度と経度を計算
-        const userLat = positions.reduce((sum, p) => sum + p.coords.latitude, 0) / positions.length;
-        const userLon = positions.reduce((sum, p) => sum + p.coords.longitude, 0) / positions.length;
-
-      // 特定地点との距離を計算
-      const distance = calculateDistance(userLat, userLon, targetLatitude, targetLongitude);
-
-      // 距離が10m以内であればアラートを表示
-      var gosa = (Math.round(distance * 10)/10);
-      var moji = "誤差："+gosa+"m";
-
-      if (distance <= 10) {
-        audioplay();alert('10m以内:'+moji+'\n'+userLat+' : '+userLon);
-        navigator.geolocation.clearWatch(watchID);
-      }else{
-        alert('離れてる:'+moji+'\n'+userLat+' : '+userLon);
-        navigator.geolocation.clearWatch(watchID);
-      }
-
-      }
-
-
-    }, function(error) {
-      alert('位置情報の取得に失敗しました: ' + error.message);
-    }, {
-      enableHighAccuracy: true
-    });
-
-
-  });
-});
-
-
-</script>
-
+    <h1>図書館で聴く音声</h1>
+    <div id="coverart">📖</div>
+    <button id="getLocation">近くの図書館を探す</button>
+    <div id="positions"></div> <!-- 緯度経度のリストを表示するためのコンテナ -->
+    <div id="stations"></div>
+    <div id="selectedStation"></div>
+    <button id="startNavigation" style="display:none;">図書館に行く</button>
+    <audio id="audio" src="voice.mp3" controls style="display:none;"></audio>
+    <script src="./app.js"></script>
+<p>　</p>
+<p>　</p>
+<hr>
+<p>API by <a rel="nofollow" target="_blank" href="https://calil.jp/doc/api.html">カーリル図書館API</a> 2024</p>
 </body>
 </html>
