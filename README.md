@@ -1,12 +1,8 @@
-![オープンスポット](https://github.com/kagua/Open-Spot-AR/assets/631291/e8771184-adc2-4959-95ce-16c971e4c20d)
-
 # Open-Spot-AR
 
 This program is free of charge. It is an open source project. It is a wonderful project that allows Japanese people to create an audio guide for your country while you are in Japan. You can link location information with audio, images, video, and other content. You can have native speakers of your country's language from all over the world produce a tour guide for you without ever leaving your location. This is a wonderful thing. Please use it to contribute to your local community and provide attractive content. Since this project is **MIT licensed**, it is very free to use and expand unlimited ideas.
 
  JavaScriptだけで動作するシンプルな地点ARです。HTMLとJavaScriptのみで実装していますので、イベントやスポットごとに改修が簡単です。
-
-![Screenshot_20231218-220830](https://github.com/kagua/Simple-Spot-AR/assets/631291/cb8728d9-87fc-44d1-9b30-7c4b5ced09bd)
 
 ## オープン音声AR「オープンスポットAR」
 
