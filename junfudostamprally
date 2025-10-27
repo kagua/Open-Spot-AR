@@ -18,6 +18,7 @@ if (!sessionStorage.getItem("reloaded")) {
 <link rel="preload" as="audio" href="bgm.mp3">
 <link rel="preload" as="audio" href="goal.mp3">
 <link rel="preload" as="image" href="goal.jpg">
+
 <title>スタンプラリー</title>
 <style>
     /* リストのスタイル */
